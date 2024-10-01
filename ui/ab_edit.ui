@@ -247,14 +247,14 @@
           <item>
            <widget class="QPushButton" name="pushButton_12">
             <property name="text">
-             <string>保存</string>
+             <string>另存</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="pushButton_13">
             <property name="text">
-             <string>保存并打开</string>
+             <string>打开已保存</string>
             </property>
            </widget>
           </item>

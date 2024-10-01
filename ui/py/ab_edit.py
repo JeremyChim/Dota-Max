@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'script.ui'
+# Form implementation generated from reading ui file 'ab_edit.ui'
 #
 # Created by: PyQt6 UI code generator 6.6.1
 #
@@ -200,8 +200,8 @@ class Ui_MainWindow(object):
         self.pushButton_9.setText(_translate("MainWindow", "粘贴"))
         self.pushButton_10.setText(_translate("MainWindow", "清空剪切板"))
         self.pushButton_11.setText(_translate("MainWindow", "撤回"))
-        self.pushButton_12.setText(_translate("MainWindow", "保存"))
-        self.pushButton_13.setText(_translate("MainWindow", "保存并打开"))
+        self.pushButton_12.setText(_translate("MainWindow", "另存"))
+        self.pushButton_13.setText(_translate("MainWindow", "打开已保存"))
         self.menu.setTitle(_translate("MainWindow", "控制台"))
         self.action.setText(_translate("MainWindow", "打开根目录"))
         self.action_2.setText(_translate("MainWindow", "载入数据"))
