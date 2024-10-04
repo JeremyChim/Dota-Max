@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PyQt6.QtCore import Qt, QStringListModel
 from ui.py.ab_edit import Ui_MainWindow
 from script.try_script import try_decorator
-from script.ab_script import ab_replace
+from script.ab_script2 import ab_replace
 from script.tab_script import tab_up, tab_down
 
 import os
@@ -35,7 +35,7 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         # 按钮事件绑定
         self.action_2.triggered.connect(lambda: self.load())
         self.action_5.triggered.connect(lambda: self.win_top())
-        self.pushButton.clicked.connect(lambda: self.calc())
+        self.pushButton.clicked.connect(lambda: self.calc(is_cd=False))
         self.pushButton_6.clicked.connect(lambda: self.down())
         self.pushButton_7.clicked.connect(lambda: self.up())
         self.pushButton_8.clicked.connect(lambda: self.cut())
@@ -43,6 +43,7 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         self.pushButton_11.clicked.connect(lambda: self.undo())
         self.pushButton_12.clicked.connect(lambda: self.save_as())
         self.pushButton_13.clicked.connect(lambda: self.open_file())
+        self.pushButton_14.clicked.connect(lambda: self.calc(is_cd=True))
 
         # 快捷键绑定
         self.action_2.setShortcut('ctrl+l')
@@ -56,10 +57,10 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         self.pushButton_13.setShortcut('ctrl+o')
 
         # 数值初始化
-        self.spinBox_2.setValue(50)  # sa+
-        self.spinBox_3.setValue(50)  # sa-
-        self.spinBox_4.setValue(100)  # sp+
-        self.spinBox_5.setValue(50)  # sp-
+        self.spinBox_2.setValue(30)  # sa+
+        self.spinBox_3.setValue(30)  # sa-
+        self.spinBox_4.setValue(60)  # sp+
+        self.spinBox_5.setValue(60)  # sp-
 
     @try_decorator
     def win_top(self):
@@ -112,14 +113,25 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
             self.clip_board = []  # 清空剪切板
             self.statusbar.showMessage(f'操作：载入数据成功，路径：{url}')
 
-    @try_decorator
-    def calc(self):
+    # @try_decorator
+    def calc(self, is_cd: bool):
         """技能计算"""
         m = self.listView.model()  # 读模型，QStringListModel
         ls = self.listView.selectionModel().selectedIndexes()  # [<PyQt6.QtCore.QModelIndex>]
         i = ls[0]  # <PyQt6.QtCore.QModelIndex>
         t = m.data(i)  # 读
-        m.setData(i, ab_replace(t))  # 写
+
+        args = {'style': 0,
+                'cd_enable': is_cd,
+                'sa_enable': self.checkBox.isChecked(),
+                'sp_enable': self.checkBox_2.isChecked(),
+                'sa_value': f'+{self.spinBox_2.value()}%',
+                'sp_value': f'+{self.spinBox_4.value()}%',
+                'sa_cd': f'-{self.spinBox_3.value()}%',
+                'sp_cd': f'-{self.spinBox_5.value()}%',
+                'ab_old': t}
+
+        m.setData(i, ab_replace(**args))  # 写
         self.undo_board = f'{t}'  # 备份原字段
 
     @try_decorator
