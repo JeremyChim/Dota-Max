@@ -59,17 +59,14 @@
           <item>
            <widget class="QPushButton" name="pushButton">
             <property name="text">
-             <string>计算后</string>
+             <string>增强</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox"/>
-          </item>
-          <item>
-           <widget class="QLabel" name="label">
+           <widget class="QPushButton" name="pushButton_14">
             <property name="text">
-             <string>位数值</string>
+             <string>减CD</string>
             </property>
            </widget>
           </item>

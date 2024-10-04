@@ -56,7 +56,6 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         self.pushButton_13.setShortcut('ctrl+o')
 
         # 数值初始化
-        self.spinBox.setValue(0)  # calc
         self.spinBox_2.setValue(50)  # sa+
         self.spinBox_3.setValue(50)  # sa-
         self.spinBox_4.setValue(100)  # sp+
