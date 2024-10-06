@@ -4,13 +4,14 @@ from plugins.ab_edit import AbEditWin
 
 
 class HeroWin(QMainWindow, Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, url: str = None):
         """英雄文件选择器"""
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle('英雄文件选择器')
         self.statusbar.showMessage('初始化完成。 英雄文件选择器：1.0.0')
 
+        self.ab_url = url  # 英雄编辑器默认载入路径
         self.ab_edit_win = None  # 用于存储 AbEditWin 实例
 
         self.init()
@@ -25,12 +26,12 @@ class HeroWin(QMainWindow, Ui_MainWindow):
     def open_ab_edit_win(self):
         """打开技能编辑器窗口"""
         if not self.ab_edit_win:
-            self.ab_edit_win = AbEditWin()
+            self.ab_edit_win = AbEditWin(self.ab_url)
         self.ab_edit_win.show()
 
 
 if __name__ == '__main__':
     app = QApplication([])
-    win = HeroWin()
+    win = HeroWin('npc_dota_hero_windrunner.txt')
     win.show()
     app.exec()

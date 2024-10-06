@@ -6,12 +6,14 @@ import configparser
 
 
 class ConfigWin(QMainWindow, Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, url: str = ''):
         """英雄文件选择器"""
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle('环境配置器')
         self.statusbar.showMessage('初始化完成。 环境配置器：1.0.0')
+
+        self.url = url
         self.cf = configparser.ConfigParser()  # config file
         self.init()
 
@@ -26,12 +28,12 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.treeWidget.setColumnWidth(1, 150)  # 设置第2列的宽度为 150
 
         # 读取配置文件
-        if not os.path.exists('config.ini'):
+        if not os.path.exists(self.url):
             self.statusbar.showMessage(f'操作：读取配置失败，错误：配置文件config.ini不存在')
 
         else:
             try:
-                self.cf.read('config.ini')
+                self.cf.read(self.url)
                 path = self.cf.get('path', 'game_path')
 
                 # 读取游戏路径
@@ -91,6 +93,6 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
 
 if __name__ == '__main__':
     app = QApplication([])
-    win = ConfigWin()
+    win = ConfigWin(url='config.ini')
     win.show()
     app.exec()

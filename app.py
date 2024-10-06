@@ -37,7 +37,7 @@ class MainWin(QMainWindow, Ui_MainWindow):
     def open_config_win(self):
         """打开英雄文件选择器窗口"""
         if not self.config_win:
-            self.config_win = ConfigWin()
+            self.config_win = ConfigWin(r'plugins/config.ini')
         self.config_win.show()
 
     def open_hero_win(self):
