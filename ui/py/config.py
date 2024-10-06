@@ -112,7 +112,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label.setText(_translate("MainWindow", "游戏路径"))
-        self.lineEdit.setPlaceholderText(_translate("MainWindow", "...\\Steam\\steamapps\\common\\dota 2 beta\\game"))
+        self.lineEdit.setPlaceholderText(_translate("MainWindow", ".../Steam/steamapps/common/dota 2 beta/game"))
         self.pushButton.setText(_translate("MainWindow", "..."))
         self.treeWidget.headerItem().setText(0, _translate("MainWindow", "文件名"))
         self.treeWidget.headerItem().setText(1, _translate("MainWindow", "修改时间"))

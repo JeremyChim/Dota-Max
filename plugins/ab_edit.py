@@ -34,6 +34,7 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
 
         # 按钮事件绑定
         self.action_2.triggered.connect(self.load)
+        self.action_4.triggered.connect(self.save_as)
         self.action_5.triggered.connect(self.win_top)
         self.pushButton.clicked.connect(lambda: self.calc(is_cd=False))
         self.pushButton_6.clicked.connect(self.down)
@@ -48,13 +49,13 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
 
         # 快捷键绑定
         self.action_2.setShortcut('ctrl+l')
+        self.action_4.setShortcut('shift+ctrl+s')
         self.pushButton.setShortcut('ctrl+`')
         self.pushButton_6.setShortcut('backspace')
         self.pushButton_7.setShortcut('tab')
         self.pushButton_8.setShortcut('ctrl+x')
         self.pushButton_9.setShortcut('ctrl+v')
         self.pushButton_11.setShortcut('ctrl+z')
-        self.pushButton_12.setShortcut('ctrl+s')
         self.pushButton_13.setShortcut('ctrl+o')
 
         # 样式字典初始化

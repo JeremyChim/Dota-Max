@@ -27,7 +27,7 @@
       <item>
        <widget class="QLineEdit" name="lineEdit">
         <property name="placeholderText">
-         <string>...\Steam\steamapps\common\dota 2 beta\game</string>
+         <string>.../Steam/steamapps/common/dota 2 beta/game</string>
         </property>
        </widget>
       </item>
