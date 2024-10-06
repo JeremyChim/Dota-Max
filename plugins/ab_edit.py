@@ -23,6 +23,7 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         self.undo_board = None  # 撤回文本
         self.clip_board = []  # 剪切板
         self.save_url = None  # 保存文件路径
+        self.styles = None  # 样式字典
 
         self.init()
 
@@ -32,16 +33,17 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
             self.load(self.open_url)  # 初始化载入文件
 
         # 按钮事件绑定
-        self.action_2.triggered.connect(lambda: self.load())
-        self.action_5.triggered.connect(lambda: self.win_top())
+        self.action_2.triggered.connect(self.load)
+        self.action_5.triggered.connect(self.win_top)
         self.pushButton.clicked.connect(lambda: self.calc(is_cd=False))
-        self.pushButton_6.clicked.connect(lambda: self.down())
-        self.pushButton_7.clicked.connect(lambda: self.up())
-        self.pushButton_8.clicked.connect(lambda: self.cut())
-        self.pushButton_9.clicked.connect(lambda: self.paste())
-        self.pushButton_11.clicked.connect(lambda: self.undo())
-        self.pushButton_12.clicked.connect(lambda: self.save_as())
-        self.pushButton_13.clicked.connect(lambda: self.open_file())
+        self.pushButton_6.clicked.connect(self.down)
+        self.pushButton_7.clicked.connect(self.up)
+        self.pushButton_8.clicked.connect(self.cut)
+        self.pushButton_9.clicked.connect(self.paste)
+        self.pushButton_10.clicked.connect(self.clean)
+        self.pushButton_11.clicked.connect(self.undo)
+        self.pushButton_12.clicked.connect(self.save_as)
+        self.pushButton_13.clicked.connect(self.open_file)
         self.pushButton_14.clicked.connect(lambda: self.calc(is_cd=True))
 
         # 快捷键绑定
@@ -55,11 +57,21 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         self.pushButton_12.setShortcut('ctrl+s')
         self.pushButton_13.setShortcut('ctrl+o')
 
+        # 样式字典初始化
+        self.styles = {
+            self.radioButton: 0,  # 自动识别
+            self.radioButton_2: 1,  # { }
+            self.radioButton_3: 2,  # “ ”
+        }
+
         # 数值初始化
         self.spinBox_2.setValue(25)  # sa+
         self.spinBox_3.setValue(25)  # sa-
         self.spinBox_4.setValue(50)  # sp+
         self.spinBox_5.setValue(50)  # sp-
+
+        # 按钮默认初始化
+        self.radioButton.click()
 
     def win_top(self):
         """窗口置顶"""
@@ -130,7 +142,12 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
             self.statusbar.showMessage(f'操作：技能计算失败，错误：内容为空')
 
         else:
-            args = {'style': 0,
+            style = 0
+            for k, v in self.styles.items():
+                if k.isChecked():
+                    style = v
+                    break
+            args = {'style': style,
                     'cd_enable': is_cd,
                     'sa_enable': self.checkBox.isChecked(),
                     'sp_enable': self.checkBox_2.isChecked(),
@@ -189,6 +206,10 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
             m.setData(i, self.undo_board)  # 写
             self.statusbar.showMessage(f'操作：撤回成功')
 
+    def clean(self):
+        self.clip_board = []  # 清空剪切板
+        self.statusbar.showMessage(f'操作：剪切板已清空')
+
     def save_as(self):
         """另存文件"""
         url, _ = QFileDialog.getSaveFileName(self, "保存文件", self.file_name, "文本文件 (*.txt);;所有文件 (*)")
@@ -224,6 +245,6 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
 
 if __name__ == '__main__':
     app = QApplication([])
-    win = AbEditWin()
+    win = AbEditWin('npc_dota_hero_windrunner.txt')
     win.show()
     app.exec()
