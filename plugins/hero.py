@@ -21,7 +21,6 @@ class HeroWin(QMainWindow, Ui_MainWindow):
         # 按钮事件绑定
         self.action_2.triggered.connect(self.open_ab_edit_win)
         # 快捷键绑定
-        self.action_2.setShortcut('F2')
 
     def open_ab_edit_win(self):
         """打开技能编辑器窗口"""
