@@ -1,8 +1,7 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PyQt6.QtCore import Qt, QStringListModel
 from ui.py.ab_edit import Ui_MainWindow
-from script.try_script import try_decorator
-from script.ab_script2 import ab_replace
+from script.ab_script import ab_replace
 from script.tab_script import tab_up, tab_down
 
 import os
@@ -57,12 +56,11 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         self.pushButton_13.setShortcut('ctrl+o')
 
         # 数值初始化
-        self.spinBox_2.setValue(30)  # sa+
-        self.spinBox_3.setValue(30)  # sa-
-        self.spinBox_4.setValue(60)  # sp+
-        self.spinBox_5.setValue(60)  # sp-
+        self.spinBox_2.setValue(25)  # sa+
+        self.spinBox_3.setValue(25)  # sa-
+        self.spinBox_4.setValue(50)  # sp+
+        self.spinBox_5.setValue(50)  # sp-
 
-    @try_decorator
     def win_top(self):
         """窗口置顶"""
         if self.action_5.isChecked() is True:
@@ -73,7 +71,6 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
             self.statusbar.showMessage('操作：窗口取消置顶')
         self.show()
 
-    @try_decorator
     def dragEnterEvent(self, event):
         """允许拖拽文件"""
         if event.mimeData().hasUrls():
@@ -81,7 +78,6 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         else:
             event.ignore()
 
-    @try_decorator
     def dropEvent(self, event):
         """处理拖放事件"""
         url = [u.toLocalFile() for u in event.mimeData().urls()][0]
@@ -95,7 +91,6 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
             self.clip_board = []  # 清空剪切板
             self.statusbar.showMessage(f'操作：载入数据成功，路径：{url}')
 
-    @try_decorator
     def load(self, url=None):
         """
         载入文件
@@ -134,7 +129,6 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         m.setData(i, ab_replace(**args))  # 写
         self.undo_board = f'{t}'  # 备份原字段
 
-    @try_decorator
     def up(self):
         """进格"""
         m = self.listView.model()  # 读模型，QStringListModel
@@ -143,7 +137,6 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         t = m.data(i)  # 读
         m.setData(i, tab_up(t))  # 写
 
-    @try_decorator
     def down(self):
         """进格"""
         m = self.listView.model()  # 读模型，QStringListModel
@@ -152,7 +145,6 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         t = m.data(i)  # 读
         m.setData(i, tab_down(t))  # 写
 
-    @try_decorator
     def cut(self):
         """剪切"""
         m = self.listView.model()  # 读模型，QStringListModel
@@ -164,7 +156,6 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         m.setData(i, '')  # 删
         self.statusbar.showMessage(f'操作：剪切成功，剪切板次数：{len(self.clip_board)}')
 
-    @try_decorator
     def paste(self):
         """粘贴"""
         m = self.listView.model()  # 读模型，QStringListModel
@@ -178,7 +169,6 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         self.clip_board = []  # 清空剪切板
         self.statusbar.showMessage(f'操作：粘贴成功')
 
-    @try_decorator
     def undo(self):
         """撤回"""
         m = self.listView.model()  # 读模型，QStringListModel
@@ -188,22 +178,24 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
             m.setData(i, self.undo_board)  # 写
             self.statusbar.showMessage(f'操作：撤回成功')
 
-    @try_decorator
     def save_as(self):
         """另存文件"""
         url, _ = QFileDialog.getSaveFileName(self, "保存文件", self.file_name, "文本文件 (*.txt);;所有文件 (*)")
-        if url:
-            with open(url, 'w') as f:
-                m = self.listView.model()  # 读模型，QStringListModel
-                row = m.rowCount()  # 共多少行
-                ls = []
-                for r in range(row):
-                    i = m.index(r, 0)  # r行0列
-                    tx = m.data(i)  # 内容
-                    ls.append(tx)  # 写入列表
-                f.writelines(ls)  # 写
-            self.save_url = url
-            self.statusbar.showMessage(f'操作：保存数据成功，路径：{url}')
+        try:
+            if url:
+                with open(url, 'w') as f:
+                    m = self.listView.model()  # 读模型，QStringListModel
+                    row = m.rowCount()  # 共多少行
+                    ls = []
+                    for r in range(row):
+                        i = m.index(r, 0)  # r行0列
+                        tx = m.data(i)  # 内容
+                        ls.append(tx)  # 写入列表
+                    f.writelines(ls)  # 写
+                self.save_url = url
+                self.statusbar.showMessage(f'操作：保存数据成功，路径：{url}')
+        except Exception as e:
+            self.statusbar.showMessage(f'操作：保存数据失败，错误：{e}')
 
     def open_file(self):
         """打开文件"""
