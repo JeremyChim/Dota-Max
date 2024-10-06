@@ -108,72 +108,83 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
             self.clip_board = []  # 清空剪切板
             self.statusbar.showMessage(f'操作：载入数据成功，路径：{url}')
 
+    def read_(self):
+        """
+        :return: 模型，行索引，行内容
+        """
+        try:
+            m = self.listView.model()  # 读模型，QStringListModel
+            ls = self.listView.selectionModel().selectedIndexes()  # [<PyQt6.QtCore.QModelIndex>]
+            i = ls[0]  # <PyQt6.QtCore.QModelIndex>
+            t = m.data(i)  # 读
+            return m, i, t
+        except Exception as e:
+            self.statusbar.showMessage(f'操作：读取模型失败，错误：{e}')
+            return None, None, None
+
     # @try_decorator
     def calc(self, is_cd: bool):
         """技能计算"""
-        m = self.listView.model()  # 读模型，QStringListModel
-        ls = self.listView.selectionModel().selectedIndexes()  # [<PyQt6.QtCore.QModelIndex>]
-        i = ls[0]  # <PyQt6.QtCore.QModelIndex>
-        t = m.data(i)  # 读
+        m, i, t = self.read_()
+        if not t:
+            self.statusbar.showMessage(f'操作：技能计算失败，错误：内容为空')
 
-        args = {'style': 0,
-                'cd_enable': is_cd,
-                'sa_enable': self.checkBox.isChecked(),
-                'sp_enable': self.checkBox_2.isChecked(),
-                'sa_value': f'+{self.spinBox_2.value()}%',
-                'sp_value': f'+{self.spinBox_4.value()}%',
-                'sa_cd': f'-{self.spinBox_3.value()}%',
-                'sp_cd': f'-{self.spinBox_5.value()}%',
-                'ab_old': t}
+        else:
+            args = {'style': 0,
+                    'cd_enable': is_cd,
+                    'sa_enable': self.checkBox.isChecked(),
+                    'sp_enable': self.checkBox_2.isChecked(),
+                    'sa_value': f'+{self.spinBox_2.value()}%',
+                    'sp_value': f'+{self.spinBox_4.value()}%',
+                    'sa_cd': f'-{self.spinBox_3.value()}%',
+                    'sp_cd': f'-{self.spinBox_5.value()}%',
+                    'ab_old': t}
 
-        m.setData(i, ab_replace(**args))  # 写
-        self.undo_board = f'{t}'  # 备份原字段
+            m.setData(i, ab_replace(**args))  # 写
+            self.undo_board = f'{t}'  # 备份原字段
 
     def up(self):
         """进格"""
-        m = self.listView.model()  # 读模型，QStringListModel
-        ls = self.listView.selectionModel().selectedIndexes()  # [<PyQt6.QtCore.QModelIndex>]
-        i = ls[0]  # <PyQt6.QtCore.QModelIndex>
-        t = m.data(i)  # 读
-        m.setData(i, tab_up(t))  # 写
+        m, i, t = self.read_()
+        if not t:
+            self.statusbar.showMessage(f'操作：进格失败，错误：内容为空')
+        else:
+            m.setData(i, tab_up(t))  # 写
 
     def down(self):
-        """进格"""
-        m = self.listView.model()  # 读模型，QStringListModel
-        ls = self.listView.selectionModel().selectedIndexes()  # [<PyQt6.QtCore.QModelIndex>]
-        i = ls[0]  # <PyQt6.QtCore.QModelIndex>
-        t = m.data(i)  # 读
-        m.setData(i, tab_down(t))  # 写
+        """退格"""
+        m, i, t = self.read_()
+        if not t:
+            self.statusbar.showMessage(f'操作：退格失败，错误：内容为空')
+        else:
+            m.setData(i, tab_down(t))  # 写
 
     def cut(self):
         """剪切"""
-        m = self.listView.model()  # 读模型，QStringListModel
-        ls = self.listView.selectionModel().selectedIndexes()  # [<PyQt6.QtCore.QModelIndex>]
-        i = ls[0]  # <PyQt6.QtCore.QModelIndex>
-        t = m.data(i)  # 读
-        t2 = '\n' + tab_up(t)
-        self.clip_board.append(t2)  # 剪切
-        m.setData(i, '')  # 删
-        self.statusbar.showMessage(f'操作：剪切成功，剪切板次数：{len(self.clip_board)}')
+        m, i, t = self.read_()
+        if not t:
+            self.statusbar.showMessage(f'操作：剪切失败，错误：内容为空')
+        else:
+            self.clip_board.append(tab_up(t))  # 剪切
+            m.setData(i, '')  # 删
+            self.statusbar.showMessage(f'操作：剪切成功，剪切板次数：{len(self.clip_board)}')
 
     def paste(self):
         """粘贴"""
-        m = self.listView.model()  # 读模型，QStringListModel
-        ls = self.listView.selectionModel().selectedIndexes()  # [<PyQt6.QtCore.QModelIndex>]
-        i = ls[0]  # <PyQt6.QtCore.QModelIndex>
-        t = m.data(i)  # 读
-        t2 = '\n'.join(self.clip_board)  # 读剪切板
-        # t3 = tab_func(t2, '+')  # 剪切板内容全部进格
-        t4 = t + t2
-        m.setData(i, t4 + '\n')  # 写
-        self.clip_board = []  # 清空剪切板
-        self.statusbar.showMessage(f'操作：粘贴成功')
+        if not self.clip_board:
+            self.statusbar.showMessage(f'操作：粘贴失败，剪切板为空')
+        else:
+            m, i, t = self.read_()
+            if not i:
+                self.statusbar.showMessage(f'操作：粘贴失败，错误：索引值为空')
+            else:
+                m.setData(i, t + '\n'.join(self.clip_board))  # 写
+                self.clip_board = []  # 清空剪切板
+                self.statusbar.showMessage(f'操作：粘贴成功')
 
     def undo(self):
         """撤回"""
-        m = self.listView.model()  # 读模型，QStringListModel
-        ls = self.listView.selectionModel().selectedIndexes()  # [<PyQt6.QtCore.QModelIndex>]
-        i = ls[0]  # <PyQt6.QtCore.QModelIndex>
+        m, i, t = self.read_()
         if self.undo_board:
             m.setData(i, self.undo_board)  # 写
             self.statusbar.showMessage(f'操作：撤回成功')
