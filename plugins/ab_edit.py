@@ -213,6 +213,6 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
 
 if __name__ == '__main__':
     app = QApplication([])
-    win = AbEditWin(r'D:\PJ\Dota Max\npc_dota_hero_spectre.txt')
+    win = AbEditWin()
     win.show()
     app.exec()
