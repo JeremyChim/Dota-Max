@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow
+from PyQt6.QtGui import QAction
 from ui.py.main import Ui_MainWindow
 from plugins.hero import HeroWin
 from plugins.config import ConfigWin
@@ -22,14 +23,24 @@ class MainWin(QMainWindow, Ui_MainWindow):
         self.config_win = None  # 用于存储 ConfigWin 实例
         self.hero_win = None  # 用于存储 HeroWin 实例
         self.cf = configparser.ConfigParser()  # config file
+        self.code_dict = {
+            # action_widget: (section, option)
+            self.action_2: ('Open Hyper AI', 'Open Fretbots Mode'),
+            self.action_3: ('Steam Command', 'Steam Boot'),
+            self.action_4: ('Steam Command', 'Steam Small Win'),
+        }
 
         self.init()
 
     def init(self):
         """初始化"""
 
+        # 动作事件绑定
+        for widget, (sec, opt) in self.code_dict.items():
+            # 确保在 lambda 表达式中使用的变量名称与在循环中定义的变量名称相匹配
+            widget.triggered.connect(lambda wid_=widget, sec_=sec, opt_=opt: self.copy_code(sec_, opt_))
+
         # 按钮事件绑定
-        self.action_2.triggered.connect(lambda: self.copy_code('Open Hyper AI', 'Open Fretbots Mode'))
         self.pushButton.clicked.connect(self.open_config_win)
         self.pushButton_4.clicked.connect(self.open_hero_win)
         self.pushButton_5.clicked.connect(self.create_vpk)

@@ -144,9 +144,9 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
 
         else:
             style = 0
-            for k, v in self.styles.items():
-                if k.isChecked():
-                    style = v
+            for radio_btn, value in self.styles.items():
+                if radio_btn.isChecked():
+                    style = value
                     break
             args = {'style': style,
                     'cd_enable': is_cd,
