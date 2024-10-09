@@ -93,6 +93,6 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
 
 if __name__ == '__main__':
     app = QApplication([])
-    win = ConfigWin(url='config.ini')
+    win = ConfigWin('../config/config.ini')
     win.show()
     app.exec()

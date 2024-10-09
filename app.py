@@ -4,17 +4,24 @@ from plugins.hero import HeroWin
 from plugins.config import ConfigWin
 
 import os
+import pyperclip
+import configparser
 
 
 class MainWin(QMainWindow, Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, url: str = ''):
+        """
+        :param url: code.ini 的路径
+        """
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle('Dota Max 游戏修改器')
         self.statusbar.showMessage('初始化完成。 游戏修改器版本：1.0.0')
 
+        self.url = url  # 用于存储 code.ini 的路径
         self.config_win = None  # 用于存储 ConfigWin 实例
         self.hero_win = None  # 用于存储 HeroWin 实例
+        self.cf = configparser.ConfigParser()  # config file
 
         self.init()
 
@@ -22,6 +29,7 @@ class MainWin(QMainWindow, Ui_MainWindow):
         """初始化"""
 
         # 按钮事件绑定
+        self.action_2.triggered.connect(lambda: self.copy_code('Open Hyper AI', 'Open Fretbots Mode'))
         self.pushButton.clicked.connect(self.open_config_win)
         self.pushButton_4.clicked.connect(self.open_hero_win)
         self.pushButton_5.clicked.connect(self.create_vpk)
@@ -34,10 +42,30 @@ class MainWin(QMainWindow, Ui_MainWindow):
         self.pushButton_5.setShortcut('ctrl+5')
         self.pushButton_6.setShortcut('ctrl+6')
 
+    def copy_code(self, sec: str, opt: str):
+        """复制指令"""
+        if not os.path.exists(self.url):
+            self.statusbar.showMessage(f'操作：复制指令失败，错误：配置文件code.ini不存在')
+
+        else:
+            try:
+                self.cf.read(self.url)
+                code = self.cf.get(sec, opt)
+
+                # 读取游戏路径
+                if not code:
+                    self.statusbar.showMessage(f'操作：复制指令失败，错误：路径为空')
+                else:
+                    self.statusbar.showMessage(f'操作：复制指令成功，指令：{code}')
+                    pyperclip.copy(code)
+
+            except Exception as e:
+                self.statusbar.showMessage(f'操作：复制指令失败，错误：{e}')
+
     def open_config_win(self):
         """打开英雄文件选择器窗口"""
         if not self.config_win:
-            self.config_win = ConfigWin(r'plugins/config.ini')
+            self.config_win = ConfigWin(r'config/config.ini')
         self.config_win.show()
 
     def open_hero_win(self):
@@ -61,6 +89,6 @@ class MainWin(QMainWindow, Ui_MainWindow):
 
 if __name__ == '__main__':
     app = QApplication([])
-    win = MainWin()
+    win = MainWin(r'config/code.ini')
     win.show()
     app.exec()
