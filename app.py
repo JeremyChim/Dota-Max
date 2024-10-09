@@ -1,5 +1,4 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow
-from PyQt6.QtGui import QAction
 from ui.py.main import Ui_MainWindow
 from plugins.hero import HeroWin
 from plugins.config import ConfigWin
