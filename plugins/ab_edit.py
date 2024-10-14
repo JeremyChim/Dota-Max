@@ -11,7 +11,7 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
     def __init__(self, url=None):
         """
         技能编辑器
-        :param url: 默认打开文件路径
+        :param url: npc_dota_hero_windrunner.txt
         """
         super().__init__()
         self.setupUi(self)

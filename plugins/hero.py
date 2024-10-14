@@ -1,11 +1,14 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow
+from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView
 from ui.py.hero import Ui_MainWindow
 from plugins.ab_edit import AbEditWin
 
 
 class HeroWin(QMainWindow, Ui_MainWindow):
     def __init__(self, url: str = None):
-        """英雄文件选择器"""
+        """
+        英雄文件选择器
+        :param url: npc_dota_hero_windrunner.txt(临时变量)
+        """
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle('英雄文件选择器')
@@ -18,6 +21,13 @@ class HeroWin(QMainWindow, Ui_MainWindow):
 
     def init(self):
         """初始化"""
+
+        # 初始化列宽
+        header = self.treeWidget.header()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)  # 设置第一列为固定宽度
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)  # 设置第一列为固定宽度
+        self.treeWidget.setColumnWidth(0, 280)  # 设置第1列的宽度为 260
+        self.treeWidget.setColumnWidth(1, 60)  # 设置第2列的宽度为 60
 
         # 按钮事件绑定
         self.action_2.triggered.connect(self.open_ab_edit_win)

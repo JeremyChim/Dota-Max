@@ -11,6 +11,7 @@ import configparser
 class MainWin(QMainWindow, Ui_MainWindow):
     def __init__(self, url: str = ''):
         """
+        主窗口
         :param url: code.ini 的路径
         """
         super().__init__()

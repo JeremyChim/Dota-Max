@@ -7,7 +7,10 @@ import configparser
 
 class ConfigWin(QMainWindow, Ui_MainWindow):
     def __init__(self, url: str = ''):
-        """英雄文件选择器"""
+        """
+        环境配置器
+        :param url: config.ini的路径
+        """
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle('环境配置器')
@@ -46,6 +49,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
                 self.statusbar.showMessage(f'操作：读取配置失败，错误：{e}')
 
         # 按钮事件绑定
+        self.action_2.triggered.connect(self.load)
         self.action_5.triggered.connect(self.save_as)
         self.pushButton.clicked.connect(self.choose)
         self.pushButton_2.clicked.connect(self.install)
@@ -72,19 +76,40 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             self.statusbar.showMessage(f'操作：载入路径成功，路径：{url}')
 
     def load(self):
+        # url, _ = QFileDialog.getOpenFileName(self, "选择文件", "", "配置文件 (*.ini);;所有文件 (*)")  # 打开文件管理器
+        # if url:
+        #     try:
+        #         self.cf.read(url)
+        #         path = self.cf.get('path', 'game_path')
+        #
+        #         # 读取游戏路径
+        #         if not path:
+        #             self.statusbar.showMessage(f'操作：读取游戏路径失败，错误：路径为空')
+        #         else:
+        #             self.lineEdit.setText(path)  # 写入路径栏中
+        #
+        #     except Exception as e:
+        #         self.statusbar.showMessage(f'操作：读取配置失败，错误：{e}')
+
         pass
 
     def save_as(self):
         """另存文件"""
         url, _ = QFileDialog.getSaveFileName(self, "保存文件", 'config.ini', "配置文件 (*.ini);;所有文件 (*)")
-        path = self.lineEdit.text()  # 游戏配置路径，捕获路径栏
-        if not path:
+        game_path = self.lineEdit.text()  # 游戏配置路径，捕获路径栏
+        dota_path = game_path + '/dota'
+        mod_path = game_path + '/mod'
+
+        if not game_path:
             self.statusbar.showMessage(f'操作：保存配置失败，配置路径为空')
 
         else:
             try:
                 with open(url, 'w') as f:
-                    self.cf['path'] = {'game_path': path}
+                    self.cf['path'] = {'game_path': game_path,
+                                       'dota_path': dota_path,
+                                       'mod_path': mod_path,
+                                       }
                     self.cf.write(f)
                     self.statusbar.showMessage(f'操作：保存配置成功，路径：{url}')
             except Exception as e:
