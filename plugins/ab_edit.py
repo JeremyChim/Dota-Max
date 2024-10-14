@@ -8,7 +8,7 @@ import os
 
 
 class AbEditWin(QMainWindow, Ui_MainWindow):
-    def __init__(self, url=None):
+    def __init__(self, url: str = None):
         """
         技能编辑器
         :param url: npc_dota_hero_windrunner.txt

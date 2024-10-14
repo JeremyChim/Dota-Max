@@ -9,7 +9,7 @@ import configparser
 
 
 class MainWin(QMainWindow, Ui_MainWindow):
-    def __init__(self, url: str = ''):
+    def __init__(self, url: str = None):
         """
         主窗口
         :param url: code.ini 的路径

@@ -1,12 +1,11 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QFileDialog
 from ui.py.config import Ui_MainWindow
 
-import os
 import configparser
 
 
 class ConfigWin(QMainWindow, Ui_MainWindow):
-    def __init__(self, url: str = ''):
+    def __init__(self, url: str = None):
         """
         环境配置器
         :param url: config.ini的路径
@@ -16,8 +15,8 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.setWindowTitle('环境配置器')
         self.statusbar.showMessage('初始化完成。 环境配置器：1.0.0')
 
-        self.url = url
-        self.cf = configparser.ConfigParser()  # config file
+        self.url = url  # config.ini 配置文件
+        self.cf = configparser.ConfigParser()  # cf
         self.init()
 
     def init(self):
@@ -30,31 +29,19 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.treeWidget.setColumnWidth(0, 400)  # 设置第1列的宽度为 400
         self.treeWidget.setColumnWidth(1, 150)  # 设置第2列的宽度为 150
 
-        # 读取配置文件
-        if not os.path.exists(self.url):
-            self.statusbar.showMessage(f'操作：读取配置失败，错误：配置文件config.ini不存在')
-
-        else:
-            try:
-                self.cf.read(self.url)
-                path = self.cf.get('path', 'game_path')
-
-                # 读取游戏路径
-                if not path:
-                    self.statusbar.showMessage(f'操作：读取游戏路径失败，错误：路径为空')
-                else:
-                    self.lineEdit.setText(path)  # 写入路径栏中
-
-            except Exception as e:
-                self.statusbar.showMessage(f'操作：读取配置失败，错误：{e}')
+        # 默认配置
+        self.load(self.url)
 
         # 按钮事件绑定
         self.action_2.triggered.connect(self.load)
-        self.action_5.triggered.connect(self.save_as)
+        self.action_3.triggered.connect(lambda: self.save(False))
+        self.action_5.triggered.connect(self.save)
         self.pushButton.clicked.connect(self.choose)
         self.pushButton_2.clicked.connect(self.install)
         self.pushButton_3.clicked.connect(self.check)
+
         # 快捷键绑定
+        self.action_3.setShortcut('ctrl+s')
         self.action_5.setShortcut('shift+ctrl+s')
         self.pushButton.setShortcut('ctrl+l')
         self.pushButton_2.setShortcut('ctrl+i')
@@ -75,27 +62,33 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             self.lineEdit.setText(url)
             self.statusbar.showMessage(f'操作：载入路径成功，路径：{url}')
 
-    def load(self):
-        # url, _ = QFileDialog.getOpenFileName(self, "选择文件", "", "配置文件 (*.ini);;所有文件 (*)")  # 打开文件管理器
-        # if url:
-        #     try:
-        #         self.cf.read(url)
-        #         path = self.cf.get('path', 'game_path')
-        #
-        #         # 读取游戏路径
-        #         if not path:
-        #             self.statusbar.showMessage(f'操作：读取游戏路径失败，错误：路径为空')
-        #         else:
-        #             self.lineEdit.setText(path)  # 写入路径栏中
-        #
-        #     except Exception as e:
-        #         self.statusbar.showMessage(f'操作：读取配置失败，错误：{e}')
+    def load(self, url: str = ''):
+        if url:
+            url_ = url
+        else:
+            url_, _ = QFileDialog.getOpenFileName(self, "选择文件", "", "配置文件 (*.ini);;所有文件 (*)")  # 打开文件管理器
 
-        pass
+        if url_:
+            try:
+                self.cf.read(url_)
+                path = self.cf.get('path', 'game_path')
 
-    def save_as(self):
-        """另存文件"""
-        url, _ = QFileDialog.getSaveFileName(self, "保存文件", 'config.ini', "配置文件 (*.ini);;所有文件 (*)")
+                # 读取游戏路径
+                if not path:
+                    self.statusbar.showMessage(f'操作：读取游戏路径失败，错误：路径为空')
+                else:
+                    self.lineEdit.setText(path)  # 写入路径栏中
+
+            except Exception as e:
+                self.statusbar.showMessage(f'操作：读取配置失败，错误：{e}')
+
+    def save(self, save_is: bool = True):
+        """保存文件"""
+        if save_is:
+            url, _ = QFileDialog.getSaveFileName(self, "保存文件", 'config.ini', "配置文件 (*.ini);;所有文件 (*)")
+        else:
+            url = self.url
+
         game_path = self.lineEdit.text()  # 游戏配置路径，捕获路径栏
         dota_path = game_path + '/dota'
         mod_path = game_path + '/mod'
