@@ -2,6 +2,9 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QFileDialog
 from ui.py.config import Ui_MainWindow
 
 import configparser
+import os
+import shutil
+import time
 
 
 class ConfigWin(QMainWindow, Ui_MainWindow):
@@ -33,6 +36,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.load(self.url)
 
         # 按钮事件绑定
+        self.action.triggered.connect(self.open_dir)
         self.action_2.triggered.connect(self.load)
         self.action_3.triggered.connect(lambda: self.save(False))
         self.action_5.triggered.connect(self.save)
@@ -41,20 +45,20 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.pushButton_3.clicked.connect(self.check)
 
         # 快捷键绑定
+        self.action.setShortcut('f1')
+        self.action_2.setShortcut('ctrl+l')
         self.action_3.setShortcut('ctrl+s')
         self.action_5.setShortcut('shift+ctrl+s')
-        self.pushButton.setShortcut('ctrl+l')
         self.pushButton_2.setShortcut('ctrl+i')
         self.pushButton_3.setShortcut('ctrl+c')
 
         # 将焦点设置到 pushButton_2
         self.pushButton_2.setFocus()
 
-    def install(self):
-        self.statusbar.showMessage('操作：安装环境成功')
-
-    def check(self):
-        self.statusbar.showMessage('操作：检查环境成功')
+    def open_dir(self):
+        root = os.getcwd()
+        os.startfile(root)
+        self.statusbar.showMessage('操作：打开根目录')
 
     def choose(self):
         url = QFileDialog.getExistingDirectory(self, "选择文件夹", self.lineEdit.text())
@@ -107,6 +111,37 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
                     self.statusbar.showMessage(f'操作：保存配置成功，路径：{url}')
             except Exception as e:
                 self.statusbar.showMessage(f'操作：保存配置失败，错误：{e}')
+
+    def copy_gi(self):
+        path = self.lineEdit.text() + '/dota'  # 游戏配置路径，捕获路径栏
+        if not os.path.exists(path):
+            os.makedirs(path)
+        else:
+            try:
+                shutil.copy('../gi/gameinfo.gi', path)
+                shutil.copy('../gi/gameinfo_branchspecific.gi', path)
+                self.statusbar.showMessage(f'操作：复制gi文件成功，路径：{path}')
+            except Exception as e:
+                self.statusbar.showMessage(f'操作：复制gi错误，错误：{e}，路径：{path}')
+
+    def create_mod_file(self):
+        path = self.lineEdit.text() + '/mod'  # 游戏配置路径，捕获路径栏
+        if not os.path.exists(path):
+            try:
+                os.makedirs(path)
+                self.statusbar.showMessage(f'操作：创建文件夹成功，路径：{path}')
+            except Exception as e:
+                self.statusbar.showMessage(f'操作：创建文件夹错误，错误：{e}，路径：{path}')
+        else:
+            self.statusbar.showMessage(f'操作：文件夹已存在，路径：{path}')
+
+    def install(self):
+        self.copy_gi()
+        self.create_mod_file()
+        self.statusbar.showMessage(f'操作：环境安装成功')
+
+    def check(self):
+        self.statusbar.showMessage('操作：检查环境成功')
 
 
 if __name__ == '__main__':

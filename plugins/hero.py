@@ -2,6 +2,8 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView
 from ui.py.hero import Ui_MainWindow
 from plugins.ab_edit import AbEditWin
 
+import os
+
 
 class HeroWin(QMainWindow, Ui_MainWindow):
     def __init__(self, url: str = None):
@@ -30,8 +32,17 @@ class HeroWin(QMainWindow, Ui_MainWindow):
         self.treeWidget.setColumnWidth(1, 60)  # 设置第2列的宽度为 60
 
         # 按钮事件绑定
+        self.action.triggered.connect(self.open_dir)
         self.action_2.triggered.connect(self.open_ab_edit_win)
+
         # 快捷键绑定
+        self.action.setShortcut('f1')
+        self.action_2.setShortcut('f2')
+
+    def open_dir(self):
+        root = os.getcwd()
+        os.startfile(root)
+        self.statusbar.showMessage('操作：打开根目录')
 
     def open_ab_edit_win(self):
         """打开技能编辑器窗口"""

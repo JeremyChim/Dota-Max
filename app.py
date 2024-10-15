@@ -41,17 +41,25 @@ class MainWin(QMainWindow, Ui_MainWindow):
             widget.triggered.connect(lambda wid_=widget, sec_=sec, opt_=opt: self.copy_code(sec_, opt_))
 
         # 按钮事件绑定
+        self.action.triggered.connect(self.open_dir)
         self.pushButton.clicked.connect(self.open_config_win)
         self.pushButton_4.clicked.connect(self.open_hero_win)
         self.pushButton_5.clicked.connect(self.create_vpk)
 
         # 快捷键绑定
+        self.action.setShortcut('f1')
+        self.action_2.setShortcut('f2')
         self.pushButton.setShortcut('ctrl+1')
         self.pushButton_2.setShortcut('ctrl+2')
         self.pushButton_3.setShortcut('ctrl+3')
         self.pushButton_4.setShortcut('ctrl+4')
         self.pushButton_5.setShortcut('ctrl+5')
         self.pushButton_6.setShortcut('ctrl+6')
+
+    def open_dir(self):
+        root = os.getcwd()
+        os.startfile(root)
+        self.statusbar.showMessage('操作：打开根目录')
 
     def copy_code(self, sec: str, opt: str):
         """复制指令"""
@@ -74,7 +82,7 @@ class MainWin(QMainWindow, Ui_MainWindow):
                 self.statusbar.showMessage(f'操作：复制指令失败，错误：{e}')
 
     def open_config_win(self):
-        """打开英雄文件选择器窗口"""
+        """打开环境配置窗口"""
         if not self.config_win:
             self.config_win = ConfigWin(r'config/config.ini')
         self.config_win.show()
