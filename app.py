@@ -94,6 +94,7 @@ class MainWin(QMainWindow, Ui_MainWindow):
         self.hero_win.show()
 
     def create_vpk(self):
+        """生成vpk"""
         if not os.path.exists('vpk/pak01_dir'):
             self.statusbar.showMessage(f'操作：生成vpk失败，错误：pak01_dir文件夹不存在')
 
@@ -104,6 +105,10 @@ class MainWin(QMainWindow, Ui_MainWindow):
                 self.statusbar.showMessage('操作：生成vpk成功')
             except Exception as e:
                 self.statusbar.showMessage(f'操作：生成vpk失败，错误：{e}')
+
+    def move_vpk(self):
+        """移动vpk"""
+        pass
 
 
 if __name__ == '__main__':
