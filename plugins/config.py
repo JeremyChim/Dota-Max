@@ -35,13 +35,14 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.load(self.url)
 
         # 按钮事件绑定
-        self.action.triggered.connect(self.open_dir)
+        self.action.triggered.connect(lambda: self.open_dir(os.getcwd()))
         self.action_2.triggered.connect(self.load)
         self.action_3.triggered.connect(self.save)
         self.action_5.triggered.connect(lambda: self.save(True))
         self.pushButton.clicked.connect(self.choose)
         self.pushButton_2.clicked.connect(self.install)
         self.pushButton_3.clicked.connect(self.check)
+        self.pushButton_4.clicked.connect(lambda: self.open_dir(self.lineEdit.text()))
 
         # 快捷键绑定
         self.action.setShortcut('f1')
@@ -54,18 +55,22 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         # 将焦点设置到 pushButton_2
         self.pushButton_2.setFocus()
 
-    def open_dir(self):
-        root = os.getcwd()
-        os.startfile(root)
-        self.statusbar.showMessage('操作：打开根目录')
+    def open_dir(self, path: str):
+        """打开目录"""
+        try:
+            os.startfile(path)
+            self.statusbar.showMessage(f'操作：打开目录，路径：{path}')
+        except Exception as e:
+            self.statusbar.showMessage(f'操作：打开目录失败，错误：{e}')
 
     def choose(self):
+        """选择路径"""
         url = QFileDialog.getExistingDirectory(self, "选择文件夹", self.lineEdit.text())
         if url:
             self.lineEdit.setText(url)
-            self.statusbar.showMessage(f'操作：载入路径成功，路径：{url}')
 
     def load(self, url: str = ''):
+        """加载文件"""
         if url:
             url_ = url
         else:
@@ -120,7 +125,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         """复制gi文件"""
         path = self.lineEdit.text() + '/dota'  # 游戏配置路径，捕获路径栏
         if not os.path.exists(path):
-            os.makedirs(path)
+            os.makedirs(path)  # 创建文件夹
         else:
             try:
                 shutil.copy('../gi/gameinfo.gi', path)
@@ -143,10 +148,13 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
 
     def install(self):
         """安装环境"""
-        self.copy_gi()
-        self.create_mod_file()
-        self.save()
-        self.statusbar.showMessage(f'操作：环境安装成功')
+        try:
+            self.copy_gi()
+            self.create_mod_file()
+            self.save()
+            self.statusbar.showMessage(f'操作：环境安装成功')
+        except Exception as e:
+            self.statusbar.showMessage(f'操作：环境安装失败，错误：{e}')
 
     def check(self):
         """检查环境"""

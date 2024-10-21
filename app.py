@@ -4,6 +4,7 @@ from plugins.hero import HeroWin
 from plugins.config import ConfigWin
 
 import os
+import shutil
 import pyperclip
 import configparser
 
@@ -45,6 +46,7 @@ class MainWin(QMainWindow, Ui_MainWindow):
         self.pushButton.clicked.connect(self.open_config_win)
         self.pushButton_4.clicked.connect(self.open_hero_win)
         self.pushButton_5.clicked.connect(self.create_vpk)
+        self.pushButton_6.clicked.connect(self.move_vpk)
 
         # 快捷键绑定
         self.action.setShortcut('f1')
@@ -108,7 +110,14 @@ class MainWin(QMainWindow, Ui_MainWindow):
 
     def move_vpk(self):
         """移动vpk"""
-        pass
+        try:
+            src = 'vpk/pak01_dir.vpk'  # 原路径
+            self.cf.read(r'config/config.ini')
+            dst = self.cf.get('path', 'mod_path')  # 目标路径
+            shutil.copy(src, dst)
+            self.statusbar.showMessage(f'操作：移动vpk成功，路径：{dst}')
+        except Exception as e:
+            self.statusbar.showMessage(f'操作：移动vpk失败，错误：{e}')
 
 
 if __name__ == '__main__':
