@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QFileDialog, QTreeWidgetItem
 from PyQt6.QtGui import QColor, QBrush
+from PyQt6.QtCore import Qt
 from ui.py.config import Ui_MainWindow
 from datetime import datetime
 
@@ -127,42 +128,54 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             except Exception as e:
                 self.statusbar.showMessage(f'操作：保存配置失败，错误：{e}')
 
-    def copy_file(self, folder: str, file: str, src: str, is_copy_folder: bool = False):
-        """复制文件"""
-        if not is_copy_folder:
-            folder_path = f'{self.lineEdit.text()}/{folder}'  # 文件夹
-            file_path = f'{self.lineEdit.text()}/{folder}/{file}'  # 文件名
+    def install_file(self, pattern: str, file: str, src: str):
+        """安装文件的函数"""
+        match pattern:
+            case 'create_folder':
+                path = f'{self.lineEdit.text()}/{file}'  # 文件夹
+                try:
+                    if not os.path.exists(path):
+                        os.makedirs(path)  # 创建文件夹
+                        self.statusbar.showMessage(f'操作：创建文件夹{file}成功，路径：{path}')
+                    else:
+                        self.statusbar.showMessage(f'操作：文件夹{file}，已存在')
+                except Exception as e:
+                    self.statusbar.showMessage(f'操作：创建文件夹{file}错误，错误：{e}，路径：{path}')
 
-            if not os.path.exists(folder_path):
-                os.makedirs(folder_path)  # 创建文件夹
-            try:
-                shutil.copy(src, file_path)
-                self.statusbar.showMessage(f'操作：复制文件{file}成功，路径：{file_path}')
-            except Exception as e:
-                self.statusbar.showMessage(f'操作：复制文件{file}错误，错误：{e}，路径：{file_path}')
-        else:
-            folder_path = f'{self.lineEdit.text()}/{folder}'  # 文件夹
-            file_path = f'{self.lineEdit.text()}/{folder}/{file}'  # 文件名
+            case 'copy_folder':
+                path = f'{self.lineEdit.text()}/{file}'  # 文件夹
+                if not os.path.exists(path):
+                    os.makedirs(path)  # 创建文件夹
+                try:
+                    shutil.copytree(src, path)
+                    self.statusbar.showMessage(f'操作：复制文件夹{file}成功，路径：{path}')
+                except Exception as e:
+                    self.statusbar.showMessage(f'操作：复制文件夹{file}错误，错误：{e}，路径：{path}')
 
-            if not os.path.exists(folder_path):
-                os.makedirs(folder_path)  # 创建文件夹
-            try:
-                shutil.copytree(src, file_path)
-                self.statusbar.showMessage(f'操作：复制文件夹{file}成功，路径：{file_path}')
-            except Exception as e:
-                self.statusbar.showMessage(f'操作：复制文件夹{file}错误，错误：{e}，路径：{file_path}')
+            case 'copy_file':
+                path = f'{self.lineEdit.text()}/{file}'
+                try:
+                    shutil.copy(src, path)
+                    self.statusbar.showMessage(f'操作：复制文件{file}成功，路径：{path}')
+                except Exception as e:
+                    self.statusbar.showMessage(f'操作：复制文件{file}错误，错误：{e}，路径：{path}')
 
     def install(self):
         """安装环境"""
-        args = [('dota', 'gameinfo.gi', '../gi/gameinfo.gi'),  # copy_gi
-                ('dota', 'gameinfo_branchspecific.gi', '../gi/gameinfo_branchspecific.gi'),  # copy_gi2
-                ('mod', 'pak01_dir.vpk', '../vpk/pak01_dir.vpk'),  # copy_vpk
-                ('dota/vscript', 'bots', '../bot/bots', True),  # copy_bots
-                ('Dota2SkinChanger', 'pak01_dir.vpk', '../skin_package/pak01_dir.vpk'),  # copy_skin
-                ]
+        # args = [('dota', 'gameinfo.gi', '../gi/gameinfo.gi'),
+        #         ('dota', 'gameinfo_branchspecific.gi', '../gi/gameinfo_branchspecific.gi'),  # copy_gi2
+        #         ('mod', 'pak01_dir.vpk', '../vpk/pak01_dir.vpk'),  # copy_vpk
+        #         ('dota/vscript', 'bots', '../bot/bots', True),  # copy_bots
+        #         ('Dota2SkinChanger', 'pak01_dir.vpk', '../skin_package/pak01_dir.vpk'),  # copy_skin
+        #         ]
+
+        args = [
+            # (pattern, file, src),
+            ('create_folder', 'dota', None),
+        ]
         try:
             for arg in args:
-                self.copy_file(*arg)
+                self.install_file(*arg)
             self.save()
             self.statusbar.showMessage(f'操作：环境安装成功')
         except Exception as e:
@@ -173,25 +186,35 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.treeWidget.clear()  # 清除所有项
         yellow = QBrush(QColor(255, 255, 0))  # 黄色背景
         green = QBrush(QColor(0, 255, 0))  # 绿色背景
-        paths = ['dota',
-                 'dota/gameinfo.gi',
-                 'dota/gameinfo_branchspecific.gi',
-                 'mod',
-                 'mod/pak01_dir.vpk',
-                 'dota/vscript/bots',
-                 ]
-        for path in paths:
+        paths = [
+            # (path, enable)
+            ('dota', True),
+            ('dota/gameinfo.gi', True),
+            ('dota/gameinfo_branchspecific.gi', True),
+            ('mod', True),
+            ('mod/pak01_dir.vpk', False),
+            ('dota/vscript/bots', False),
+            ('Dota2SkinChanger', False),
+            ('Dota2SkinChanger/pak01_dir.vpk', False),
+        ]
+
+        for (path, enable) in paths:
             url = f'{self.lineEdit.text()}/{path}'
             item = QTreeWidgetItem([path])  # 创建项
             if not os.path.exists(url):  # 创建文件是否存在
                 item.setBackground(0, yellow)  # 黄背景
                 item.setText(1, '文件不存在')  # 写入信息
+
             else:
                 item.setBackground(0, green)  # 绿背景
                 st = os.stat(url).st_mtime  # 获取修改时间
                 fts = datetime.fromtimestamp(st)
                 ts = fts.strftime('%Y-%m-%d %H:%M:%S')
                 item.setText(1, ts)
+            if enable:
+                item.setCheckState(0, Qt.CheckState.Checked)  # 已勾选
+            else:
+                item.setCheckState(0, Qt.CheckState.Unchecked)  # 未勾选
             self.treeWidget.addTopLevelItem(item)  # 将项添加到树形控件
 
 
