@@ -144,10 +144,12 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
 
             case 'copy_folder':
                 path = f'{self.lineEdit.text()}/{file}'  # 文件夹
-                if os.path.exists(path):
-                    shutil.rmtree(path)  # 如果文件夹存在，先删除
                 try:
-                    shutil.copytree(src, path)
+                    if os.path.exists(path):
+                        shutil.rmtree(path)  # 如果文件夹存在，先删除
+                    src2 = src.replace('../', './')
+                    src3 = src2 if os.path.exists(src2) else src  # 区分内部调用和外部调用，路径不一样
+                    shutil.copytree(src3, path)
                     self.statusbar.showMessage(f'操作：复制文件夹{file}成功，路径：{path}')
                 except Exception as e:
                     self.statusbar.showMessage(f'操作：复制文件夹{file}错误，错误：{e}，路径：{path}')
@@ -155,38 +157,30 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             case 'copy_file':
                 path = f'{self.lineEdit.text()}/{file}'
                 try:
-                    shutil.copy(src, path)
+                    src2 = src.replace('../', './')
+                    src3 = src2 if os.path.exists(src2) else src  # 区分内部调用和外部调用，路径不一样
+                    shutil.copy(src3, path)
                     self.statusbar.showMessage(f'操作：复制文件{file}成功，路径：{path}')
                 except Exception as e:
                     self.statusbar.showMessage(f'操作：复制文件{file}错误，错误：{e}，路径：{path}')
 
     def install(self):
         """安装环境"""
-        # args = [('dota', 'gameinfo.gi', '../gi/gameinfo.gi'),
-        #         ('dota', 'gameinfo_branchspecific.gi', '../gi/gameinfo_branchspecific.gi'),  # copy_gi2
-        #         ('mod', 'pak01_dir.vpk', '../vpk/pak01_dir.vpk'),  # copy_vpk
-        #         ('dota/vscript', 'bots', '../bot/bots', True),  # copy_bots
-        #         ('Dota2SkinChanger', 'pak01_dir.vpk', '../skin_package/pak01_dir.vpk'),  # copy_skin
-        #         ]
-
         args = [
-            # (pattern, file, src),
-            # ('create_folder', 'dota', None),
-            # ('copy_file', 'dota/gameinfo.gi', '../gi/gameinfo.gi'),
-            # ('copy_file', 'dota/gameinfo_branchspecific.gi', '../gi/gameinfo_branchspecific.gi'),
-            # ('create_folder', 'mod', None),
-            # ('copy_file', 'mod/pak01_dir.vpk', '../vpk/pak01_dir.vpk'),
+            # ex: (pattern, file, src),
+            ('create_folder', 'dota', None),
+            ('copy_file', 'dota/gameinfo.gi', '../gi/gameinfo.gi'),
+            ('copy_file', 'dota/gameinfo_branchspecific.gi', '../gi/gameinfo_branchspecific.gi'),
+            ('create_folder', 'mod', None),
+            ('copy_file', 'mod/pak01_dir.vpk', '../vpk/pak01_dir.vpk'),
             ('copy_folder', 'dota/scripts/vscripts/bots', '../bot/bots'),
-            # ('create_folder', 'Dota2SkinChanger', None),
-            # ('copy_file', 'Dota2SkinChanger/pak01_dir.vpk', '../skin_package/pak01_dir.vpk'),
+            ('create_folder', 'Dota2SkinChanger', None),
+            ('copy_file', 'Dota2SkinChanger/pak01_dir.vpk', '../skin_package/pak01_dir.vpk'),
         ]
-        try:
-            for arg in args:
-                self.install_file(*arg)
-            # self.save()
-            # self.statusbar.showMessage(f'操作：环境安装成功')
-        except Exception as e:
-            self.statusbar.showMessage(f'操作：环境安装失败，错误：{e}')
+        for arg in args:
+            self.install_file(*arg)
+        self.save()
+        # self.statusbar.showMessage(f'操作：环境安装成功')
 
     def check(self):
         """初始化检查"""
@@ -199,10 +193,10 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             ('dota/gameinfo.gi', True),
             ('dota/gameinfo_branchspecific.gi', True),
             ('mod', True),
-            ('mod/pak01_dir.vpk', False),
-            ('dota/scripts/vscripts/bots', False),
-            ('Dota2SkinChanger', False),
-            ('Dota2SkinChanger/pak01_dir.vpk', False),
+            ('mod/pak01_dir.vpk', True),
+            ('dota/scripts/vscripts/bots', True),
+            ('Dota2SkinChanger', True),
+            ('Dota2SkinChanger/pak01_dir.vpk', True),
         ]
 
         for (path, enable) in paths:
