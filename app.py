@@ -19,44 +19,51 @@ class MainWin(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle('Dota Max 游戏修改器')
         self.statusbar.showMessage('初始化完成。 游戏修改器版本：1.0.0')
-
         self.url = url  # 用于存储 code.ini 的路径
         self.config_win = None  # 用于存储 ConfigWin 实例
         self.hero_win = None  # 用于存储 HeroWin 实例
         self.cf = configparser.ConfigParser()  # config file
-        self.code_dict = {
-            # action_widget: (section, option)
-            self.action_2: ('Open Hyper AI', 'Open Fretbots Mode'),
-            self.action_3: ('Steam Command', 'Steam Boot'),
-            self.action_4: ('Steam Command', 'Steam Small Win'),
-        }
-
         self.init()
 
     def init(self):
         """初始化"""
+        self.init_btn()  # 按钮事件绑定
+        self.init_hotkey()  # 快捷键绑定
+        self.init_widget()  # 动作事件绑定
 
-        # 动作事件绑定
-        for widget, (sec, opt) in self.code_dict.items():
-            # 确保在 lambda 表达式中使用的变量名称与在循环中定义的变量名称相匹配
-            widget.triggered.connect(lambda wid_=widget, sec_=sec, opt_=opt: self.copy_code(sec_, opt_))
-
-        # 按钮事件绑定
+    def init_btn(self):
+        """按钮事件绑定"""
         self.action.triggered.connect(self.open_dir)
         self.pushButton.clicked.connect(self.open_config_win)
         self.pushButton_4.clicked.connect(self.open_hero_win)
         self.pushButton_5.clicked.connect(self.create_vpk)
-        self.pushButton_6.clicked.connect(self.move_vpk)
+        self.pushButton_6.clicked.connect(self.copy_vpk)
 
-        # 快捷键绑定
+    def init_hotkey(self):
+        """快捷键绑定"""
         self.action.setShortcut('f1')
         self.action_2.setShortcut('f2')
+        self.action_3.setShortcut('f3')
+        self.action_4.setShortcut('f4')
+        self.action_5.setShortcut('f5')
         self.pushButton.setShortcut('ctrl+1')
         self.pushButton_2.setShortcut('ctrl+2')
         self.pushButton_3.setShortcut('ctrl+3')
         self.pushButton_4.setShortcut('ctrl+4')
         self.pushButton_5.setShortcut('ctrl+5')
         self.pushButton_6.setShortcut('ctrl+6')
+
+    def init_widget(self):
+        """动作事件绑定"""
+        args = [
+            # (action_widget, section, option)
+            (self.action_2, 'Open Hyper AI', 'Open Fretbots Mode'),
+            (self.action_3, 'Steam Command', 'Steam Boot'),
+            (self.action_4, 'Steam Command', 'Steam Small Win')
+        ]
+        for (widget, sec, opt) in args:
+            # 确保在 lambda 表达式中使用的变量名称与在循环中定义的变量名称相匹配
+            widget.triggered.connect(lambda wid_=widget, sec_=sec, opt_=opt: self.copy_code(sec_, opt_))
 
     def open_dir(self):
         root = os.getcwd()
@@ -67,19 +74,15 @@ class MainWin(QMainWindow, Ui_MainWindow):
         """复制指令"""
         if not os.path.exists(self.url):
             self.statusbar.showMessage(f'操作：复制指令失败，错误：配置文件code.ini不存在')
-
         else:
             try:
                 self.cf.read(self.url)
                 code = self.cf.get(sec, opt)
-
-                # 读取游戏路径
                 if not code:
                     self.statusbar.showMessage(f'操作：复制指令失败，错误：路径为空')
                 else:
                     self.statusbar.showMessage(f'操作：复制指令成功，指令：{code}')
                     pyperclip.copy(code)
-
             except Exception as e:
                 self.statusbar.showMessage(f'操作：复制指令失败，错误：{e}')
 
@@ -108,7 +111,7 @@ class MainWin(QMainWindow, Ui_MainWindow):
             except Exception as e:
                 self.statusbar.showMessage(f'操作：生成vpk失败，错误：{e}')
 
-    def move_vpk(self):
+    def copy_vpk(self):
         """移动vpk"""
         try:
             src = 'vpk/pak01_dir.vpk'  # 原路径

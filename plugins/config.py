@@ -1,5 +1,7 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QFileDialog
+from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QFileDialog, QTreeWidgetItem
+from PyQt6.QtGui import QColor, QBrush
 from ui.py.config import Ui_MainWindow
+from datetime import datetime
 
 import configparser
 import os
@@ -16,25 +18,21 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle('环境配置器')
         self.statusbar.showMessage('初始化完成。 环境配置器：1.0.0')
-
         self.url = url  # config.ini 配置文件
         self.cf = configparser.ConfigParser()  # cf
         self.init()
 
     def init(self):
         """初始化"""
+        self.load(self.url)  # 初始化配置（加载路径至路径栏）
+        self.init_btn()  # 按钮事件绑定
+        self.init_hotkey()  # 快捷键绑定
+        self.init_width()  # 初始化列宽
+        self.check()  # 初始化检查
+        self.pushButton_2.setFocus()  # 将焦点设置到 pushButton_2
 
-        # 初始化列宽
-        header = self.treeWidget.header()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)  # 设置第一列为固定宽度
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)  # 设置第一列为固定宽度
-        self.treeWidget.setColumnWidth(0, 400)  # 设置第1列的宽度为 400
-        self.treeWidget.setColumnWidth(1, 150)  # 设置第2列的宽度为 150
-
-        # 默认配置
-        self.load(self.url)
-
-        # 按钮事件绑定
+    def init_btn(self):
+        """按钮事件绑定"""
         self.action.triggered.connect(lambda: self.open_dir(os.getcwd()))
         self.action_2.triggered.connect(self.load)
         self.action_3.triggered.connect(self.save)
@@ -44,7 +42,8 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.pushButton_3.clicked.connect(self.check)
         self.pushButton_4.clicked.connect(lambda: self.open_dir(self.lineEdit.text()))
 
-        # 快捷键绑定
+    def init_hotkey(self):
+        """快捷键绑定"""
         self.action.setShortcut('f1')
         self.action_2.setShortcut('ctrl+l')
         self.action_3.setShortcut('ctrl+s')
@@ -52,8 +51,13 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.pushButton_2.setShortcut('ctrl+i')
         self.pushButton_3.setShortcut('ctrl+c')
 
-        # 将焦点设置到 pushButton_2
-        self.pushButton_2.setFocus()
+    def init_width(self):
+        """初始化列宽"""
+        header = self.treeWidget.header()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)  # 设置第一列为固定宽度
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)  # 设置第一列为固定宽度
+        self.treeWidget.setColumnWidth(0, 400)  # 设置第1列的宽度为 400
+        self.treeWidget.setColumnWidth(1, 150)  # 设置第2列的宽度为 150
 
     def open_dir(self, path: str):
         """打开目录"""
@@ -72,21 +76,19 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
     def load(self, url: str = ''):
         """加载文件"""
         if url:
-            url_ = url
+            cf_url = url
         else:
-            url_, _ = QFileDialog.getOpenFileName(self, "选择文件", "", "配置文件 (*.ini);;所有文件 (*)")  # 打开文件管理器
+            # 打开文件管理器
+            cf_url, _ = QFileDialog.getOpenFileName(self, "选择文件", "", "配置文件 (*.ini);;所有文件 (*)")
 
-        if url_:
+        if cf_url:
             try:
-                self.cf.read(url_)
-                path = self.cf.get('path', 'game_path')
-
-                # 读取游戏路径
+                self.cf.read(cf_url)
+                path = self.cf.get('path', 'game_path')  # 读取游戏路径
                 if not path:
                     self.statusbar.showMessage(f'操作：读取游戏路径失败，错误：路径为空')
                 else:
                     self.lineEdit.setText(path)  # 写入路径栏中
-
             except Exception as e:
                 self.statusbar.showMessage(f'操作：读取配置失败，错误：{e}')
 
@@ -103,6 +105,8 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         gi_path = game_path + '/dota/gameinfo.gi'
         gi2_path = game_path + '/dota/gameinfo_branchspecific.gi'
         mod_path = game_path + '/mod'
+        vpk_path = game_path + '/mod/pak01_dir.vpk'
+        bot_path = game_path + '/dota/vscript/bots'
 
         if not game_path:
             self.statusbar.showMessage(f'操作：保存配置失败，配置路径为空')
@@ -115,62 +119,80 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
                                        'gi_path': gi_path,
                                        'gi2_path': gi2_path,
                                        'mod_path': mod_path,
+                                       'vpk_path': vpk_path,
+                                       'bot_path': bot_path,
                                        }
                     self.cf.write(f)
                     self.statusbar.showMessage(f'操作：保存配置成功，路径：{url}')
             except Exception as e:
                 self.statusbar.showMessage(f'操作：保存配置失败，错误：{e}')
 
-    def copy_gi(self):
-        """复制gi文件"""
-        path = self.lineEdit.text() + '/dota'  # 游戏配置路径，捕获路径栏
-        if not os.path.exists(path):
-            os.makedirs(path)  # 创建文件夹
-        else:
-            try:
-                shutil.copy('../gi/gameinfo.gi', path)
-                shutil.copy('../gi/gameinfo_branchspecific.gi', path)
-                self.statusbar.showMessage(f'操作：复制gi文件成功，路径：{path}')
-            except Exception as e:
-                self.statusbar.showMessage(f'操作：复制gi错误，错误：{e}，路径：{path}')
+    def copy_file(self, folder: str, file: str, src: str, is_copy_folder: bool = False):
+        """复制文件"""
+        if not is_copy_folder:
+            folder_path = f'{self.lineEdit.text()}/{folder}'  # 文件夹
+            file_path = f'{self.lineEdit.text()}/{folder}/{file}'  # 文件名
 
-    def create_mod_file(self):
-        """创建mod文件夹"""
-        path = self.lineEdit.text() + '/mod'  # 游戏配置路径，捕获路径栏
-        if not os.path.exists(path):
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)  # 创建文件夹
             try:
-                os.makedirs(path)
-                self.statusbar.showMessage(f'操作：创建文件夹成功，路径：{path}')
+                shutil.copy(src, file_path)
+                self.statusbar.showMessage(f'操作：复制文件{file}成功，路径：{file_path}')
             except Exception as e:
-                self.statusbar.showMessage(f'操作：创建文件夹错误，错误：{e}，路径：{path}')
+                self.statusbar.showMessage(f'操作：复制文件{file}错误，错误：{e}，路径：{file_path}')
         else:
-            self.statusbar.showMessage(f'操作：文件夹已存在，路径：{path}')
+            folder_path = f'{self.lineEdit.text()}/{folder}'  # 文件夹
+            file_path = f'{self.lineEdit.text()}/{folder}/{file}'  # 文件名
+
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)  # 创建文件夹
+            try:
+                shutil.copytree(src, file_path)
+                self.statusbar.showMessage(f'操作：复制文件夹{file}成功，路径：{file_path}')
+            except Exception as e:
+                self.statusbar.showMessage(f'操作：复制文件夹{file}错误，错误：{e}，路径：{file_path}')
 
     def install(self):
         """安装环境"""
+        args = [('dota', 'gameinfo.gi', '../gi/gameinfo.gi'),  # copy_gi
+                ('dota', 'gameinfo_branchspecific.gi', '../gi/gameinfo_branchspecific.gi'),  # copy_gi2
+                ('mod', 'pak01_dir.vpk', '../vpk/pak01_dir.vpk'),  # copy_vpk
+                ('dota/vscript', 'bots', '../bot/bots', True),  # copy_bots
+                ('Dota2SkinChanger', 'pak01_dir.vpk', '../skin_package/pak01_dir.vpk'),  # copy_skin
+                ]
         try:
-            self.copy_gi()
-            self.create_mod_file()
+            for arg in args:
+                self.copy_file(*arg)
             self.save()
             self.statusbar.showMessage(f'操作：环境安装成功')
         except Exception as e:
             self.statusbar.showMessage(f'操作：环境安装失败，错误：{e}')
 
     def check(self):
-        """检查环境"""
-        cf = self.cf
-        cf.read(self.url)
-
-        flag = True
-
-        for opt in cf.options('path'):
-            path = cf.get('path', opt)
-            if not os.path.exists(path):
-                self.statusbar.showMessage(f'操作：环境检查不通过，目标文件不存在，路径：{path}')
-                flag = False
-
-        if flag:
-            self.statusbar.showMessage(f'操作：环境检查通过')
+        """初始化检查"""
+        self.treeWidget.clear()  # 清除所有项
+        yellow = QBrush(QColor(255, 255, 0))  # 黄色背景
+        green = QBrush(QColor(0, 255, 0))  # 绿色背景
+        paths = ['dota',
+                 'dota/gameinfo.gi',
+                 'dota/gameinfo_branchspecific.gi',
+                 'mod',
+                 'mod/pak01_dir.vpk',
+                 'dota/vscript/bots',
+                 ]
+        for path in paths:
+            url = f'{self.lineEdit.text()}/{path}'
+            item = QTreeWidgetItem([path])  # 创建项
+            if not os.path.exists(url):  # 创建文件是否存在
+                item.setBackground(0, yellow)  # 黄背景
+                item.setText(1, '文件不存在')  # 写入信息
+            else:
+                item.setBackground(0, green)  # 绿背景
+                st = os.stat(url).st_mtime  # 获取修改时间
+                fts = datetime.fromtimestamp(st)
+                ts = fts.strftime('%Y-%m-%d %H:%M:%S')
+                item.setText(1, ts)
+            self.treeWidget.addTopLevelItem(item)  # 将项添加到树形控件
 
 
 if __name__ == '__main__':
