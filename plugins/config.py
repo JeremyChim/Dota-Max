@@ -107,7 +107,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         gi2_path = game_path + '/dota/gameinfo_branchspecific.gi'
         mod_path = game_path + '/mod'
         vpk_path = game_path + '/mod/pak01_dir.vpk'
-        bot_path = game_path + '/dota/vscript/bots'
+        bot_path = game_path + '/dota/scripts/vscripts/bots'
 
         if not game_path:
             self.statusbar.showMessage(f'操作：保存配置失败，配置路径为空')
@@ -144,8 +144,8 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
 
             case 'copy_folder':
                 path = f'{self.lineEdit.text()}/{file}'  # 文件夹
-                if not os.path.exists(path):
-                    os.makedirs(path)  # 创建文件夹
+                if os.path.exists(path):
+                    shutil.rmtree(path)  # 如果文件夹存在，先删除
                 try:
                     shutil.copytree(src, path)
                     self.statusbar.showMessage(f'操作：复制文件夹{file}成功，路径：{path}')
@@ -171,13 +171,20 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
 
         args = [
             # (pattern, file, src),
-            ('create_folder', 'dota', None),
+            # ('create_folder', 'dota', None),
+            # ('copy_file', 'dota/gameinfo.gi', '../gi/gameinfo.gi'),
+            # ('copy_file', 'dota/gameinfo_branchspecific.gi', '../gi/gameinfo_branchspecific.gi'),
+            # ('create_folder', 'mod', None),
+            # ('copy_file', 'mod/pak01_dir.vpk', '../vpk/pak01_dir.vpk'),
+            ('copy_folder', 'dota/scripts/vscripts/bots', '../bot/bots'),
+            # ('create_folder', 'Dota2SkinChanger', None),
+            # ('copy_file', 'Dota2SkinChanger/pak01_dir.vpk', '../skin_package/pak01_dir.vpk'),
         ]
         try:
             for arg in args:
                 self.install_file(*arg)
-            self.save()
-            self.statusbar.showMessage(f'操作：环境安装成功')
+            # self.save()
+            # self.statusbar.showMessage(f'操作：环境安装成功')
         except Exception as e:
             self.statusbar.showMessage(f'操作：环境安装失败，错误：{e}')
 
@@ -193,7 +200,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             ('dota/gameinfo_branchspecific.gi', True),
             ('mod', True),
             ('mod/pak01_dir.vpk', False),
-            ('dota/vscript/bots', False),
+            ('dota/scripts/vscripts/bots', False),
             ('Dota2SkinChanger', False),
             ('Dota2SkinChanger/pak01_dir.vpk', False),
         ]
