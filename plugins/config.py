@@ -93,9 +93,9 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             except Exception as e:
                 self.statusbar.showMessage(f'操作：读取配置失败，错误：{e}')
 
-    def save(self, save_is: bool = False):
+    def save(self, save_as: bool = False):
         """保存文件"""
-        if save_is:  # 另存
+        if save_as:  # 另存
             cf_url = self.url if self.url else 'config.ini'
             url, _ = QFileDialog.getSaveFileName(self, "保存文件", cf_url, "配置文件 (*.ini);;所有文件 (*)")
         else:
@@ -108,6 +108,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         mod_path = game_path + '/mod'
         vpk_path = game_path + '/mod/pak01_dir.vpk'
         bot_path = game_path + '/dota/scripts/vscripts/bots'
+        bot_workshop_path = game_path.replace('common/dota 2 beta/game', 'workshop/content/570/3246316298')
 
         if not game_path:
             self.statusbar.showMessage(f'操作：保存配置失败，配置路径为空')
@@ -122,6 +123,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
                                        'mod_path': mod_path,
                                        'vpk_path': vpk_path,
                                        'bot_path': bot_path,
+                                       'bot_workshop_path': bot_workshop_path,
                                        }
                     self.cf.write(f)
                     self.statusbar.showMessage(f'操作：保存配置成功，路径：{url}')
@@ -177,18 +179,24 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             ('create_folder', 'Dota2SkinChanger', None),
             ('copy_file', 'Dota2SkinChanger/pak01_dir.vpk', '../skin_package/pak01_dir.vpk'),
         ]
+        i = 0
         for arg in args:
-            self.install_file(*arg)
+            item = self.treeWidget.topLevelItem(i)  # 项
+            check_state = item.checkState(0)  # 勾选状态
+            if check_state.value == 2:  # 勾选为2，未勾选为0
+                self.install_file(*arg)  # 执行安装函数
+            i += 1
+
         self.save()
         # self.statusbar.showMessage(f'操作：环境安装成功')
 
     def check(self):
-        """初始化检查"""
+        """检查"""
         self.treeWidget.clear()  # 清除所有项
         yellow = QBrush(QColor(255, 255, 0))  # 黄色背景
         green = QBrush(QColor(0, 255, 0))  # 绿色背景
         paths = [
-            # (path, enable)
+            # (path, check)
             ('dota', True),
             ('dota/gameinfo.gi', True),
             ('dota/gameinfo_branchspecific.gi', True),
@@ -198,21 +206,19 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             ('Dota2SkinChanger', True),
             ('Dota2SkinChanger/pak01_dir.vpk', True),
         ]
-
-        for (path, enable) in paths:
+        for (path, check) in paths:
             url = f'{self.lineEdit.text()}/{path}'
             item = QTreeWidgetItem([path])  # 创建项
             if not os.path.exists(url):  # 创建文件是否存在
                 item.setBackground(0, yellow)  # 黄背景
                 item.setText(1, '文件不存在')  # 写入信息
-
             else:
                 item.setBackground(0, green)  # 绿背景
                 st = os.stat(url).st_mtime  # 获取修改时间
                 fts = datetime.fromtimestamp(st)
                 ts = fts.strftime('%Y-%m-%d %H:%M:%S')
                 item.setText(1, ts)
-            if enable:
+            if check is True:
                 item.setCheckState(0, Qt.CheckState.Checked)  # 已勾选
             else:
                 item.setCheckState(0, Qt.CheckState.Unchecked)  # 未勾选
