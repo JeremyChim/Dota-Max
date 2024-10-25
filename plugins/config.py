@@ -21,6 +21,22 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.statusbar.showMessage('初始化完成。 环境配置器：1.0.0')
         self.url = url  # config.ini 配置文件
         self.cf = configparser.ConfigParser()  # cf
+        self.args = [
+            # mode: 1=create_folder, 2=copy_file, 3=copy_folder
+            # file: 目标文件
+            # src: 源文件地址
+            # check_state: True=勾选, False=不勾选
+            {'mode': 1, 'file': 'dota', 'src': None, 'check_state': True},
+            {'mode': 2, 'file': 'dota/gameinfo.gi', 'src': '../gi/gameinfo.gi', 'check_state': True},
+            {'mode': 2, 'file': 'dota/gameinfo_branchspecific.gi', 'src': '../gi/gameinfo_branchspecific.gi',
+             'check_state': True},
+            {'mode': 3, 'file': 'dota/scripts/vscripts/bots', 'src': '../bot/bots', 'check_state': True},
+            {'mode': 1, 'file': 'mod', 'src': None, 'check_state': True},
+            {'mode': 2, 'file': 'mod/pak01_dir.vpk', 'src': '../vpk/pak01_dir.vpk', 'check_state': True},
+            {'mode': 1, 'file': 'Dota2SkinChanger', 'src': None, 'check_state': True},
+            {'mode': 2, 'file': 'Dota2SkinChanger/pak01_dir.vpk', 'src': '../skin_package/pak01_dir.vpk',
+             'check_state': True},
+        ]
         self.init()
 
     def init(self):
@@ -100,7 +116,6 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             url, _ = QFileDialog.getSaveFileName(self, "保存文件", cf_url, "配置文件 (*.ini);;所有文件 (*)")
         else:
             url = self.url
-
         game_path = self.lineEdit.text()  # 游戏配置路径，捕获路径栏
         dota_path = game_path + '/dota'
         gi_path = game_path + '/dota/gameinfo.gi'
@@ -112,7 +127,6 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
 
         if not game_path:
             self.statusbar.showMessage(f'操作：保存配置失败，配置路径为空')
-
         else:
             try:
                 with open(url, 'w') as f:
@@ -130,10 +144,14 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             except Exception as e:
                 self.statusbar.showMessage(f'操作：保存配置失败，错误：{e}')
 
-    def install_file(self, pattern: str, file: str, src: str):
-        """安装文件的函数"""
-        match pattern:
-            case 'create_folder':
+    def install_file(self, mode: int, file: str, src: str, **kwargs):
+        """安装文件的函数
+        :param mode: 1=create_folder, 2=copy_file, 3=copy_folder
+        :param file: 目标文件
+        :param src: 源文件地址
+        """
+        match mode:
+            case 1:  # create_folder
                 path = f'{self.lineEdit.text()}/{file}'  # 文件夹
                 try:
                     if not os.path.exists(path):
@@ -144,7 +162,17 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
                 except Exception as e:
                     self.statusbar.showMessage(f'操作：创建文件夹{file}错误，错误：{e}，路径：{path}')
 
-            case 'copy_folder':
+            case 2:  # copy_file
+                path = f'{self.lineEdit.text()}/{file}'
+                try:
+                    src2 = src.replace('../', './')
+                    src3 = src2 if os.path.exists(src2) else src  # 区分内部调用和外部调用，路径不一样
+                    shutil.copy(src3, path)
+                    self.statusbar.showMessage(f'操作：复制文件{file}成功，路径：{path}')
+                except Exception as e:
+                    self.statusbar.showMessage(f'操作：复制文件{file}错误，错误：{e}，路径：{path}')
+
+            case 3:  # copy_folder
                 path = f'{self.lineEdit.text()}/{file}'  # 文件夹
                 try:
                     if os.path.exists(path):
@@ -156,59 +184,28 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
                 except Exception as e:
                     self.statusbar.showMessage(f'操作：复制文件夹{file}错误，错误：{e}，路径：{path}')
 
-            case 'copy_file':
-                path = f'{self.lineEdit.text()}/{file}'
-                try:
-                    src2 = src.replace('../', './')
-                    src3 = src2 if os.path.exists(src2) else src  # 区分内部调用和外部调用，路径不一样
-                    shutil.copy(src3, path)
-                    self.statusbar.showMessage(f'操作：复制文件{file}成功，路径：{path}')
-                except Exception as e:
-                    self.statusbar.showMessage(f'操作：复制文件{file}错误，错误：{e}，路径：{path}')
-
     def install(self):
         """安装环境"""
-        args = [
-            # ex: (pattern, file, src),
-            ('create_folder', 'dota', None),
-            ('copy_file', 'dota/gameinfo.gi', '../gi/gameinfo.gi'),
-            ('copy_file', 'dota/gameinfo_branchspecific.gi', '../gi/gameinfo_branchspecific.gi'),
-            ('create_folder', 'mod', None),
-            ('copy_file', 'mod/pak01_dir.vpk', '../vpk/pak01_dir.vpk'),
-            ('copy_folder', 'dota/scripts/vscripts/bots', '../bot/bots'),
-            ('create_folder', 'Dota2SkinChanger', None),
-            ('copy_file', 'Dota2SkinChanger/pak01_dir.vpk', '../skin_package/pak01_dir.vpk'),
-        ]
         i = 0
-        for arg in args:
+        for arg in self.args:
             item = self.treeWidget.topLevelItem(i)  # 项
             check_state = item.checkState(0)  # 勾选状态
             if check_state.value == 2:  # 勾选为2，未勾选为0
-                self.install_file(*arg)  # 执行安装函数
+                self.install_file(**arg)  # 执行安装函数
             i += 1
-
         self.save()
         # self.statusbar.showMessage(f'操作：环境安装成功')
 
     def check(self):
         """检查"""
-        self.treeWidget.clear()  # 清除所有项
         yellow = QBrush(QColor(255, 255, 0))  # 黄色背景
         green = QBrush(QColor(0, 255, 0))  # 绿色背景
-        paths = [
-            # (path, check)
-            ('dota', True),
-            ('dota/gameinfo.gi', True),
-            ('dota/gameinfo_branchspecific.gi', True),
-            ('mod', True),
-            ('mod/pak01_dir.vpk', True),
-            ('dota/scripts/vscripts/bots', True),
-            ('Dota2SkinChanger', True),
-            ('Dota2SkinChanger/pak01_dir.vpk', True),
-        ]
-        for (path, check) in paths:
-            url = f'{self.lineEdit.text()}/{path}'
-            item = QTreeWidgetItem([path])  # 创建项
+        self.treeWidget.clear()  # 清除所有项
+
+        for arg in self.args:
+            file, check_state = arg['file'], arg['check_state']
+            url = f'{self.lineEdit.text()}/{file}'
+            item = QTreeWidgetItem([file])  # 创建项
             if not os.path.exists(url):  # 创建文件是否存在
                 item.setBackground(0, yellow)  # 黄背景
                 item.setText(1, '文件不存在')  # 写入信息
@@ -218,7 +215,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
                 fts = datetime.fromtimestamp(st)
                 ts = fts.strftime('%Y-%m-%d %H:%M:%S')
                 item.setText(1, ts)
-            if check is True:
+            if check_state is True:
                 item.setCheckState(0, Qt.CheckState.Checked)  # 已勾选
             else:
                 item.setCheckState(0, Qt.CheckState.Unchecked)  # 未勾选
