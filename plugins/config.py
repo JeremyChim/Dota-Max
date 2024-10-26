@@ -26,7 +26,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             # file: 目标文件
             # src: 源文件地址
             # check_state: True=勾选, False=不勾选
-            {'mode': 1, 'file': 'dota', 'src': None, 'check_state': True},
+            {'mode': 1, 'file': 'dota', 'src': None, 'check_state': True, 'haha': 1},
             {'mode': 2, 'file': 'dota/gameinfo.gi', 'src': '../gi/gameinfo.gi', 'check_state': True},
             {'mode': 2, 'file': 'dota/gameinfo_branchspecific.gi', 'src': '../gi/gameinfo_branchspecific.gi',
              'check_state': True},
@@ -45,7 +45,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.init_btn()  # 按钮事件绑定
         self.init_hotkey()  # 快捷键绑定
         self.init_width()  # 初始化列宽
-        self.check()  # 初始化检查
+        self.check(True)  # 初始化检查
         self.pushButton_2.setFocus()  # 将焦点设置到 pushButton_2
 
     def init_btn(self):
@@ -129,7 +129,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             self.statusbar.showMessage(f'操作：保存配置失败，配置路径为空')
         else:
             try:
-                with open(url, 'w') as f:
+                with open(url, 'w', encoding='utf-8') as f:
                     self.cf['path'] = {'game_path': game_path,
                                        'dota_path': dota_path,
                                        'gi_path': gi_path,
@@ -139,7 +139,8 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
                                        'bot_path': bot_path,
                                        'bot_workshop_path': bot_workshop_path,
                                        }
-                    self.cf.write(f)
+                    self.cf.write(f) # type: ignore
+                    print(f)
                     self.statusbar.showMessage(f'操作：保存配置成功，路径：{url}')
             except Exception as e:
                 self.statusbar.showMessage(f'操作：保存配置失败，错误：{e}')
@@ -183,6 +184,8 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
                     self.statusbar.showMessage(f'操作：复制文件夹{file}成功，路径：{path}')
                 except Exception as e:
                     self.statusbar.showMessage(f'操作：复制文件夹{file}错误，错误：{e}，路径：{path}')
+            case _:
+                print(**kwargs)
 
     def install(self):
         """安装环境"""
@@ -196,10 +199,21 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.save()
         # self.statusbar.showMessage(f'操作：环境安装成功')
 
-    def check(self):
+    def check(self, init: bool = False):
         """检查"""
         yellow = QBrush(QColor(255, 255, 0))  # 黄色背景
         green = QBrush(QColor(0, 255, 0))  # 绿色背景
+
+        # 记忆勾选状态
+        if init is False:
+            i = 0
+            for arg in self.args:
+                item = self.treeWidget.topLevelItem(i)  # 项
+                check_state = item.checkState(0)  # 勾选状态
+                state = True if check_state.value == 2 else False  # 勾选为2，未勾选为0
+                arg['check_state'] = state  # 修改键值
+                i += 1
+
         self.treeWidget.clear()  # 清除所有项
 
         for arg in self.args:
