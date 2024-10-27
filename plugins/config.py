@@ -26,7 +26,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             # file: 目标文件
             # src: 源文件地址
             # check_state: True=勾选, False=不勾选
-            {'mode': 1, 'file': 'dota', 'src': None, 'check_state': True, 'haha': 1},
+            {'mode': 1, 'file': 'dota', 'src': None, 'check_state': True},
             {'mode': 2, 'file': 'dota/gameinfo.gi', 'src': '../gi/gameinfo.gi', 'check_state': True},
             {'mode': 2, 'file': 'dota/gameinfo_branchspecific.gi', 'src': '../gi/gameinfo_branchspecific.gi',
              'check_state': True},
