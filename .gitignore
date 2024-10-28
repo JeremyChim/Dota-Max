@@ -1,7 +1,7 @@
 *.pyc
 .idea
-install/build
-install/dist
+install/build/*
+install/dist/*
 vpk/pak01_dir.vpk
 vpk/pak01_dir/*
 skin_package/*
