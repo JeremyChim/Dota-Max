@@ -50,6 +50,7 @@ class HeroWin(QMainWindow, Ui_MainWindow):
     def init_tree(self):
         """初始化树形控件"""
         cf_url = '../config/hero_tag.ini'
+        cf_url = cf_url if os.path.exists(cf_url) else './config/hero_tag.ini'
         self.cf.read(cf_url, encoding='utf-8')
 
         path = '../npc/heroes'
