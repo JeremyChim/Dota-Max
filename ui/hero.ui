@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>883</width>
+    <width>1121</width>
     <height>555</height>
    </rect>
   </property>
@@ -48,57 +48,6 @@
           <string>标签</string>
          </property>
         </column>
-        <item>
-         <property name="text">
-          <string>npc_dota_hero_chen.txt</string>
-         </property>
-         <property name="checkState">
-          <enum>Unchecked</enum>
-         </property>
-         <property name="text">
-          <string>陈</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>npc_dota_hero_bane.txt</string>
-         </property>
-         <property name="checkState">
-          <enum>Unchecked</enum>
-         </property>
-         <property name="text">
-          <string>霍乱</string>
-         </property>
-         <property name="background">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>0</blue>
-           </color>
-          </brush>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>npc_dota_hero_axe.txt</string>
-         </property>
-         <property name="checkState">
-          <enum>Unchecked</enum>
-         </property>
-         <property name="text">
-          <string>斧王</string>
-         </property>
-         <property name="background">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>85</red>
-            <green>255</green>
-            <blue>0</blue>
-           </color>
-          </brush>
-         </property>
-        </item>
        </widget>
       </item>
      </layout>
@@ -197,8 +146,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>883</width>
-     <height>23</height>
+     <width>1121</width>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

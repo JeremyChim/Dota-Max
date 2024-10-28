@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QTreeWidgetItem
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor, QBrush
 from ui.py.hero import Ui_MainWindow
 from plugins.ab_edit import AbEditWin
 
@@ -42,28 +43,28 @@ class HeroWin(QMainWindow, Ui_MainWindow):
     def init_width(self):
         """初始化列宽"""
         header = self.treeWidget.header()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)  # 设置第一列为固定宽度
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)  # 设置第一列为固定宽度
-        self.treeWidget.setColumnWidth(0, 280)  # 设置第1列的宽度为 260
-        self.treeWidget.setColumnWidth(1, 60)  # 设置第2列的宽度为 60
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)  # 设置第1列为固定宽度
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)  # 设置第2列为固定宽度
+        self.treeWidget.setColumnWidth(0, 300)  # 设置第1列的宽度为 300
+        self.treeWidget.setColumnWidth(1, 100)  # 设置第2列的宽度为 100
 
     def init_tree(self):
         """初始化树形控件"""
+        grey = QBrush(QColor(200, 200, 200))  # 灰色背景
+
         cf_url = '../config/hero_tag.ini'
-        cf_url = cf_url if os.path.exists(cf_url) else './config/hero_tag.ini'
+        cf_url = cf_url if os.path.exists(cf_url) else './config/hero_tag.ini' # 区分内部调用和外部调用，路径不一样
         self.cf.read(cf_url, encoding='utf-8')
 
         path = '../npc/heroes'
         path = path if os.path.exists(path) else './npc/heroes'  # 区分内部调用和外部调用，路径不一样
         item_list = os.listdir(path)  # 获取目录下的所有文件和目录名
-        # print(item_list)
-        # item_list = [f for f in file if os.path.isfile(os.path.join(path, f))]  # 过滤出文件名，忽略目录
-        # print(item_list)
 
         for item_name in item_list:
             tag = self.cf.get('tag', item_name, fallback=None)  # 获取标签名, 如果没有返回None
             item = QTreeWidgetItem([item_name, tag])  # 创建项
-            item.setCheckState(0, Qt.CheckState.Unchecked)  # 未勾选
+            item.setCheckState(0, Qt.CheckState.Unchecked)  # 第1列添加未勾选框
+            item.setBackground(1, grey)  # 第2列灰色背景
             self.treeWidget.addTopLevelItem(item)  # 将项添加到树形控件
 
     def open_dir(self):
