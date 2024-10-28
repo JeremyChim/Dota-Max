@@ -2,7 +2,7 @@
 .idea
 install/build
 install/dist
-vpk/pak01_dir
 vpk/pak01_dir.vpk
-skin_package
-bot/bots
+vpk/pak01_dir/*
+skin_package/*
+bot/bots/*
