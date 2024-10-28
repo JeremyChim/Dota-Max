@@ -53,13 +53,14 @@ class HeroWin(QMainWindow, Ui_MainWindow):
         self.cf.read(cf_url, encoding='utf-8')
 
         path = '../npc/heroes'
+        path = path if os.path.exists(path) else './npc/heroes'  # 区分内部调用和外部调用，路径不一样
         item_list = os.listdir(path)  # 获取目录下的所有文件和目录名
         # print(item_list)
         # item_list = [f for f in file if os.path.isfile(os.path.join(path, f))]  # 过滤出文件名，忽略目录
         # print(item_list)
 
         for item_name in item_list:
-            tag = self.cf.get('tag', item_name)  # 获取标签名
+            tag = self.cf.get('tag', item_name, fallback=None)  # 获取标签名, 如果没有返回None
             item = QTreeWidgetItem([item_name, tag])  # 创建项
             item.setCheckState(0, Qt.CheckState.Unchecked)  # 未勾选
             self.treeWidget.addTopLevelItem(item)  # 将项添加到树形控件
