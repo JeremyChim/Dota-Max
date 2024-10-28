@@ -78,7 +78,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addLayout(self.verticalLayout_2)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 883, 24))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 883, 23))
         self.menubar.setObjectName("menubar")
         self.menu = QtWidgets.QMenu(parent=self.menubar)
         self.menu.setObjectName("menu")
@@ -104,7 +104,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.lineEdit.setPlaceholderText(_translate("MainWindow", "输入“axe” 或者 “斧王”进行筛选 "))
-        self.treeWidget.setSortingEnabled(True)
+        self.treeWidget.setSortingEnabled(False)
         self.treeWidget.headerItem().setText(0, _translate("MainWindow", "npc/heroes"))
         self.treeWidget.headerItem().setText(1, _translate("MainWindow", "标签"))
         __sortingEnabled = self.treeWidget.isSortingEnabled()
