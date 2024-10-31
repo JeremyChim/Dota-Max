@@ -32,7 +32,7 @@ class HeroWin(QMainWindow, Ui_MainWindow):
 
     def init_btn(self):
         """按钮事件绑定"""
-        self.action.triggered.connect(self.open_dir)
+        self.action.triggered.connect(lambda: self.open_dir(os.getcwd()))
         self.action_2.triggered.connect(self.open_ab_edit_win)
 
     def init_hotkey(self):
@@ -50,10 +50,10 @@ class HeroWin(QMainWindow, Ui_MainWindow):
 
     def init_tree(self):
         """初始化树形控件"""
-        grey = QBrush(QColor(200, 200, 200))  # 灰色背景
+        grey = QBrush(QColor(220, 220, 220))  # 灰色背景
 
         cf_url = '../config/hero_tag.ini'
-        cf_url = cf_url if os.path.exists(cf_url) else './config/hero_tag.ini' # 区分内部调用和外部调用，路径不一样
+        cf_url = cf_url if os.path.exists(cf_url) else './config/hero_tag.ini'  # 区分内部调用和外部调用，路径不一样
         self.cf.read(cf_url, encoding='utf-8')
 
         path = '../npc/heroes'
@@ -66,11 +66,28 @@ class HeroWin(QMainWindow, Ui_MainWindow):
             item.setCheckState(0, Qt.CheckState.Unchecked)  # 第1列添加未勾选框
             item.setBackground(1, grey)  # 第2列灰色背景
             self.treeWidget.addTopLevelItem(item)  # 将项添加到树形控件
+            self.treeWidget.itemDoubleClicked.connect(self.double_clicked)
 
-    def open_dir(self):
-        root = os.getcwd()
-        os.startfile(root)
-        self.statusbar.showMessage('操作：打开根目录')
+    def double_clicked(self, item):
+        """treeWidget项双击事件"""
+        _path = os.getcwd().replace("\\", "/")  # 获取运行目录
+        _list = _path.split('/')
+
+        # 区分内部调用和外部调用，路径不一样
+        if _list[-1] == 'Dota-Max':
+            root = _path
+        else:
+            root = '/'.join(_list[:-1])
+        path = f'{root}/npc/heroes/{item.text(0)}'  # 默认第1列
+        self.open_dir(path)
+
+    def open_dir(self, path):
+        """打开目录"""
+        try:
+            os.startfile(path)
+            self.statusbar.showMessage(f'操作：打开目录，路径：{path}')
+        except Exception as e:
+            self.statusbar.showMessage(f'操作：打开目录失败，错误：{e}')
 
     def open_ab_edit_win(self):
         """打开技能编辑器窗口"""

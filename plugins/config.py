@@ -58,6 +58,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.pushButton_2.clicked.connect(self.install)
         self.pushButton_3.clicked.connect(self.check)
         self.pushButton_4.clicked.connect(lambda: self.open_dir(self.lineEdit.text()))
+        self.treeWidget.itemDoubleClicked.connect(self.double_clicked)
 
     def init_hotkey(self):
         """快捷键绑定"""
@@ -75,6 +76,11 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)  # 设置第一列为固定宽度
         self.treeWidget.setColumnWidth(0, 400)  # 设置第1列的宽度为 400
         self.treeWidget.setColumnWidth(1, 150)  # 设置第2列的宽度为 150
+
+    def double_clicked(self, item, column):
+        """treeWidget项双击事件"""
+        path = f'{self.lineEdit.text()}/{item.text(column)}'
+        self.open_dir(path)
 
     def open_dir(self, path: str):
         """打开目录"""
@@ -116,6 +122,18 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             url, _ = QFileDialog.getSaveFileName(self, "保存文件", cf_url, "配置文件 (*.ini);;所有文件 (*)")
         else:
             url = self.url
+
+        _path = os.getcwd().replace("\\", "/")  # 获取运行目录
+        _list = _path.split('/')
+        # 区分内部调用和外部调用，路径不一样
+        if _list[-1] == 'Dota-Max':
+            max_path = _path
+        else:
+            max_path = '/'.join(_list[:-1])
+        plugins_path = f'{max_path}/plugins'
+        npc_path = f'{max_path}/npc'
+        hero_data_path = f'{max_path}/npc/heroes'
+
         game_path = self.lineEdit.text()  # 游戏配置路径，捕获路径栏
         dota_path = game_path + '/dota'
         gi_path = game_path + '/dota/gameinfo.gi'
@@ -123,13 +141,18 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         mod_path = game_path + '/mod'
         vpk_path = game_path + '/mod/pak01_dir.vpk'
         bot_path = game_path + '/dota/scripts/vscripts/bots'
-        bot_workshop_path = game_path.replace('common/dota 2 beta/game', 'workshop/content/570/3246316298')
+        bot_online_path = game_path.replace('common/dota 2 beta/game', 'workshop/content/570/3246316298')
 
         if not game_path:
             self.statusbar.showMessage(f'操作：保存配置失败，配置路径为空')
         else:
             try:
                 with open(url, 'w', encoding='utf-8') as f:
+                    self.cf['max'] = {'max_path': max_path,
+                                      'plugins_path': plugins_path,
+                                      'npc_path': npc_path,
+                                      'hero_data_path': hero_data_path,
+                                      }
                     self.cf['path'] = {'game_path': game_path,
                                        'dota_path': dota_path,
                                        'gi_path': gi_path,
@@ -137,10 +160,9 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
                                        'mod_path': mod_path,
                                        'vpk_path': vpk_path,
                                        'bot_path': bot_path,
-                                       'bot_workshop_path': bot_workshop_path,
+                                       'bot_online_path': bot_online_path,
                                        }
-                    self.cf.write(f) # type: ignore
-                    print(f)
+                    self.cf.write(f)  # type: ignore
                     self.statusbar.showMessage(f'操作：保存配置成功，路径：{url}')
             except Exception as e:
                 self.statusbar.showMessage(f'操作：保存配置失败，错误：{e}')
@@ -187,18 +209,6 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             case _:
                 print(**kwargs)
 
-    def install(self):
-        """安装环境"""
-        i = 0
-        for arg in self.args:
-            item = self.treeWidget.topLevelItem(i)  # 项
-            check_state = item.checkState(0)  # 勾选状态
-            if check_state.value == 2:  # 勾选为2，未勾选为0
-                self.install_file(**arg)  # 执行安装函数
-            i += 1
-        self.save()
-        # self.statusbar.showMessage(f'操作：环境安装成功')
-
     def check(self, init: bool = False):
         """检查"""
         yellow = QBrush(QColor(255, 255, 0))  # 黄色背景
@@ -234,6 +244,19 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
             else:
                 item.setCheckState(0, Qt.CheckState.Unchecked)  # 未勾选
             self.treeWidget.addTopLevelItem(item)  # 将项添加到树形控件
+
+    def install(self):
+        """安装环境"""
+        i = 0
+        for arg in self.args:
+            item = self.treeWidget.topLevelItem(i)  # 项
+            check_state = item.checkState(0)  # 勾选状态
+            if check_state.value == 2:  # 勾选为2，未勾选为0
+                self.install_file(**arg)  # 执行安装函数
+            i += 1
+        self.check()
+        self.save()
+        self.statusbar.showMessage(f'操作：已执行环境安装')
 
 
 if __name__ == '__main__':
