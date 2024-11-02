@@ -54,6 +54,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.action_2.triggered.connect(self.load)
         self.action_3.triggered.connect(self.save)
         self.action_5.triggered.connect(lambda: self.save(True))
+        self.action_6.triggered.connect(self.update_bots)
         self.pushButton.clicked.connect(self.choose)
         self.pushButton_2.clicked.connect(self.install)
         self.pushButton_3.clicked.connect(self.check)
@@ -66,6 +67,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.action_2.setShortcut('ctrl+l')
         self.action_3.setShortcut('ctrl+s')
         self.action_5.setShortcut('shift+ctrl+s')
+        self.action_6.setShortcut('ctrl+u')
         self.pushButton_2.setShortcut('ctrl+i')
         self.pushButton_3.setShortcut('ctrl+c')
 
@@ -206,6 +208,19 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
                     self.statusbar.showMessage(f'操作：复制文件夹{file}成功，路径：{path}')
                 except Exception as e:
                     self.statusbar.showMessage(f'操作：复制文件夹{file}错误，错误：{e}，路径：{path}')
+
+            case 4:  # copy_folder(update_bots)
+                path = file
+                try:
+                    if os.path.exists(path):
+                        shutil.rmtree(path)  # 如果文件夹存在，先删除
+                    src2 = src.replace('../', './')
+                    src3 = src2 if os.path.exists(src2) else src  # 区分内部调用和外部调用，路径不一样
+                    shutil.copytree(src3, path)
+                    self.statusbar.showMessage(f'操作：复制文件夹{file}成功，路径：{path}')
+                except Exception as e:
+                    self.statusbar.showMessage(f'操作：复制文件夹{file}错误，错误：{e}，路径：{path}')
+
             case _:
                 print(**kwargs)
 
@@ -257,6 +272,11 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
         self.check()
         self.save()
         self.statusbar.showMessage(f'操作：已执行环境安装')
+
+    def update_bots(self):
+        path = self.lineEdit.text().replace('common/dota 2 beta/game', 'workshop/content/570/3246316298')
+        arg = {'mode': 4, 'file': '../bot/bots', 'src': path}
+        self.install_file(**arg)  # 执行安装函数
 
 
 if __name__ == '__main__':
