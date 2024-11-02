@@ -275,7 +275,7 @@ class ConfigWin(QMainWindow, Ui_MainWindow):
 
     def update_bots(self):
         path = self.lineEdit.text().replace('common/dota 2 beta/game', 'workshop/content/570/3246316298')
-        arg = {'mode': 4, 'file': '../bot/bots', 'src': path}
+        arg = {'mode': 4, 'file': './bot/bots', 'src': path}
         self.install_file(**arg)  # 执行安装函数
 
 
