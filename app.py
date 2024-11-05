@@ -27,9 +27,38 @@ class MainWin(QMainWindow, Ui_MainWindow):
 
     def init(self):
         """初始化"""
+        # self.init_config()  # 初始化配置
         self.init_btn()  # 按钮事件绑定
         self.init_hotkey()  # 快捷键绑定
         self.init_widget()  # 动作事件绑定
+
+    def init_config(self):
+        """初始化配置"""
+        self.cf.read(r'config/config.ini')  # 追加写入，不是覆盖，后续可注释
+
+        root = os.getcwd().replace('\\', '/')
+        gi = root + '/gi/gameinfo.gi'
+        gi2 = root + '/gi/gameinfo_branchspecific.gi'
+        config = root + '/config/config.ini'
+        tag = root + '/config/hero_tag.ini'
+        code = root + '/config/code.ini'
+        npc = root + '/config/npc'
+        hero = root + '/config/npc/heroes'
+        skin = root + '/config/skin_mod'
+
+        self.cf['Dota_Max'] = {'root': root,
+                               'gi': gi,
+                               'gi2': gi2,
+                               'config': config,
+                               'tag': tag,
+                               'code': code,
+                               'npc': npc,
+                               'hero': hero,
+                               'skin': skin,
+                               }
+
+        with open(config, 'w', encoding='utf-8') as f:
+            self.cf.write(f)  # type: ignore
 
     def init_btn(self):
         """按钮事件绑定"""
