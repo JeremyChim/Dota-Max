@@ -66,10 +66,10 @@ class AbEditWin(QMainWindow, Ui_MainWindow):
         }
 
         # 数值初始化
-        self.spinBox_2.setValue(25)  # sa+
+        self.spinBox_2.setValue(100)  # sa+
         self.spinBox_3.setValue(25)  # sa-
-        self.spinBox_4.setValue(50)  # sp+
-        self.spinBox_5.setValue(50)  # sp-
+        self.spinBox_4.setValue(100)  # sp+
+        self.spinBox_5.setValue(25)  # sp-
 
         # 按钮默认初始化
         self.radioButton.click()
